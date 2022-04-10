@@ -3,11 +3,11 @@ import time
 import csv
 
 x_value = 0
-total_1 = 0
-total_2 = 0
+brd1V = 0
+brd2V = 0
 
 with open('data.csv', 'w',newline='') as csv_file:
-        fieldnames = ["x_value", "total_1", "total_2"]
+        fieldnames = ["x_value", "brd1V", "brd2V"]
         csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         csv_writer.writeheader()
 
@@ -26,8 +26,8 @@ while True:
         csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         info = {
             "x_value": x_value,
-            "total_1": arrdata[1],
-            "total_2": arrdata[3]
+            "brd1V": arrdata[1],
+            "brd2V": arrdata[3]
         }
         #print(info)
         csv_writer.writerow(info)

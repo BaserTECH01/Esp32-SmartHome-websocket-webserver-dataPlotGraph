@@ -17,6 +17,14 @@ String JSONtxt1;
 
 #include "webpahe.h"
 
+int board1_volt=0;
+int board2_volt=0;
+int board3_volt=0;
+int board1_Current=0;
+int board2_Current=0;
+int board3_Current=0;
+
+
 void handleRoot()
 {
   server.send(200,"text/html", webpageCont);
@@ -27,13 +35,10 @@ void handleRoot()
 // WiFi handling
 // ----------------------------------------------------------------------------
 
-int board1_volt=0;
-int board2_volt=0;
-int board3_volt=0;
 
 // Statik IP adres
 IPAddress local_IP(192, 168, 1, 43);
-// Gateway IP adresi
+// Gateway IP adres
 IPAddress gateway(192, 168, 1, 1);
 //Subnet
 IPAddress subnet(255, 255, 0, 0);
@@ -50,6 +55,7 @@ String success;
 typedef struct struct_message {
     int id;
     int Volt;
+    int Current;
 
 } struct_message;
 
@@ -108,12 +114,15 @@ boardsStruct[myData.id-1].Volt = myData.Volt;
 
 if(myData.id==1){
     board1_volt=myData.Volt;
+    board1_Current=myData.Current;
   }
    else if(myData.id==2){
     board2_volt=myData.Volt;
+    board2_Current=myData.Current;
   }
    else if(myData.id==3){
     board3_volt=myData.Volt;
+    board3_Current=myData.Current;
   }
 }
 
@@ -155,7 +164,11 @@ void loop() {
 String board1volt = String(board1_volt);
 String board2volt = String(board2_volt);
 String board3volt = String(board3_volt);
-  JSONtxt1 = "{\"board1\":\""+board1volt+"\",\"board2\":\""+board2volt+"\",\"board3\":\""+board3volt+"\"}";
+
+String board1Current = String(board1_Current);
+String board2Current = String(board2_Current);
+String board3Current = String(board3_Current);
+  JSONtxt1 = "{\"brd1V\":\""+board1volt+"\",\"brd1C\":\""+board1Current+"\",\"brd2V\":\""+board2volt+"\",\"brd2C\":\""+board2Current+"\",\"brd3V\":\""+board3volt+"\",\"brd3C\":\""+board3Current+"\"}";
   
   webSocket.broadcastTXT(JSONtxt1);
 /*

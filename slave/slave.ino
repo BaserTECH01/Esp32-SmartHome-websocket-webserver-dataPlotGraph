@@ -3,13 +3,16 @@
 #include <esp_wifi.h>
 #include <esp_now.h>
 
-const int analogInPin = 35;
-int gridVolt = 0;  
+const int analogVoltPin = 32;
+const int analogCurrentPin = 35;
+int gridVolt = 0;
+int current =0;  
 String success;
 
 typedef struct struct_message {
     int id;
     int Volt;
+    int Current;
 
 } struct_message;
 
@@ -95,6 +98,8 @@ void initEspNow() {
 
 void setup() {
     Serial.begin(115200);
+    pinMode(analogVoltPin,INPUT);
+    pinMode(analogCurrentPin,INPUT);
 
     initWiFi();
     initEspNow();
@@ -108,8 +113,9 @@ uint32_t last;
 
 void loop() {
   getReadings();
-  myData.id=1;
+  myData.id=3;
   myData.Volt = gridVolt;
+  myData.Current= current;
     if (millis() - last > 1) {
         
         
@@ -127,6 +133,7 @@ void loop() {
 }
 
 void getReadings(){
-    gridVolt = analogRead(analogInPin);
+    gridVolt = analogRead(analogVoltPin);
+    current = analogRead(analogCurrentPin);
 
 }
