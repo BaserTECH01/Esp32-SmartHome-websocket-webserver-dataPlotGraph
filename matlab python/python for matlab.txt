@@ -1,0 +1,5 @@
+install: Matlab R2022a  
+install: python 3.8.7 ("python-3.8.7-amd64.exe")
+
+matlab command for python setup:
+pyenv('Version','3.8')  

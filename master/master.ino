@@ -14,8 +14,7 @@
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 String JSONtxt1;
-String JSONtxt2;
-String JSONtxt3;
+
 #include "webpahe.h"
 
 void handleRoot()

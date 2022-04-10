@@ -108,9 +108,9 @@ uint32_t last;
 
 void loop() {
   getReadings();
-  myData.id=2;
+  myData.id=1;
   myData.Volt = gridVolt;
-    if (millis() - last > 500) {
+    if (millis() - last > 1) {
         
         
         esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &myData, sizeof(myData));

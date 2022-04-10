@@ -6,12 +6,11 @@ x_value = 0
 total_1 = 0
 total_2 = 0
 
-fieldnames = ["x_value", "total_1", "total_2"]
+with open('data.csv', 'w',newline='') as csv_file:
+        fieldnames = ["x_value", "total_1", "total_2"]
+        csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        csv_writer.writeheader()
 
-
-with open('data.csv', 'w') as csv_file:
-    csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-    csv_writer.writeheader()
 
 
 while True:
@@ -23,9 +22,8 @@ while True:
     data=data.replace("{","").replace("}","").replace(":",",").replace('"',"")
     arrdata=data.split(',')
 
-    with open('data.csv', 'a') as csv_file:
+    with open('data.csv', 'a',newline='') as csv_file:
         csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-
         info = {
             "x_value": x_value,
             "total_1": arrdata[1],
