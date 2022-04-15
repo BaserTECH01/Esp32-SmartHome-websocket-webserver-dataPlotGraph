@@ -8,20 +8,31 @@ const int analogCurrentPin = 35;
 int gridVolt = 0;
 int current =0;  
 String success;
-
+boolean RelayState;
+int relaypin =26;
 typedef struct struct_message {
     int id;
     int Volt;
     int Current;
+    boolean State;
 
 } struct_message;
 
 // Create a struct_message called BME280Readings to hold sensor readings
 struct_message myData;
-
+struct_message board1;
 // Create a struct_message to hold incoming sensor readings
 struct_message incomingReadings;
 
+typedef struct led_message {
+    int id;
+    boolean State;
+    
+
+} led_message;
+// Create a struct_message called BME280Readings to hold sensor readings
+
+led_message relayboard;
 // ----------------------------------------------------------------------------
 // WiFi handling
 // ----------------------------------------------------------------------------
@@ -53,9 +64,26 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 }
 
 
+
+
+
+void onReceive(const uint8_t *mac_addr, const uint8_t *data, int len) {
+
+    Serial.printf("received: %3u from %02x:%02x:%02x:%02x:%02x:%02x\n",
+        (uint8_t) *data,
+        mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]
+    );
+
+memcpy(&relayboard, data, sizeof(relayboard));
+
+ if(relayboard.id==1){
+  RelayState=relayboard.State;
+  }
+}
+
 void initWiFi() {
 
-    WiFi.mode(WIFI_MODE_STA);
+    WiFi.mode(WIFI_MODE_APSTA);
 
     int32_t channel = getWiFiChannel(WIFI_SSID);
 
@@ -81,7 +109,7 @@ void initEspNow() {
         while (1);
     }
    esp_now_register_send_cb(OnDataSent);
-   
+   esp_now_register_recv_cb(onReceive);
     memcpy(peerInfo.peer_addr, ESP_NOW_RECEIVER, 6);
     peerInfo.ifidx   = WIFI_IF_STA;
     peerInfo.encrypt = false;
@@ -100,7 +128,8 @@ void setup() {
     Serial.begin(115200);
     pinMode(analogVoltPin,INPUT);
     pinMode(analogCurrentPin,INPUT);
-
+    pinMode(relaypin,OUTPUT);
+    
     initWiFi();
     initEspNow();
 }
@@ -113,9 +142,12 @@ uint32_t last;
 
 void loop() {
   getReadings();
-  myData.id=3;
+  myData.id=1;
   myData.Volt = gridVolt;
   myData.Current= current;
+  digitalWrite(relaypin, RelayState);
+
+  
     if (millis() - last > 1) {
         
         

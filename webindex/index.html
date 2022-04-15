@@ -75,14 +75,14 @@ R"=====(
     <td>Board 1</td>
     <td><span style="color:rgb(216, 3, 3)" id="board1V">0</span> V </td>
     <td><span style="color:rgb(15, 56, 245)" id="board1C">0</span> A</td>
-    <th><button class="button"  id="btn"  onclick="button()" > </button></td>
+    <td><button class="button"  id="btn"  onclick="button()" >ON</button></td>
   
   </tr>
   <tr style="height:100px">
     <td>Board 2</td>
     <td><span style="color:rgb(216, 3, 3)" id="board2V">0</span> V </td>
     <td><span style="color:rgb(15, 56, 245)" id="board2C">0</span> A</td>
-    <th><button class="button"  id="btn2"  onclick="button2()" > </button></td>
+    <th>ON</td>
   </tr>
   <tr style="height:100px">
     <td>Board 3</td>
@@ -227,74 +227,38 @@ R"=====(
     websock.onmessage=function(evt)
     {
       
-      JSONobj = JSON.parse(evt.data);
-          
-           document.getElementById('board1V').innerHTML = JSONobj.brd1V;
-           document.getElementById('board1C').innerHTML = JSONobj.brd1C;
-           document.getElementById('board2V').innerHTML = JSONobj.brd2V;
-           document.getElementById('board2C').innerHTML = JSONobj.brd2C;
-           document.getElementById('board3V').innerHTML = JSONobj.brd3V;
-           document.getElementById('board3C').innerHTML = JSONobj.brd3C;
-          
-          //1. BUTON
-          if(JSONobj.brd1S == 'ON')
-          {
-            document.getElementById('btn').innerHTML = JSONobj.brd1S;
-            document.getElementById('btn').style.background = '#3e8e41';
-          }
-          else if(JSONobj.brd1S == 'OFF')
-          {
-            document.getElementById('btn').innerHTML = JSONobj.brd1S;
-            document.getElementById('btn').style.background='#d40505';
-          }
-
-
-          //2. BUTON
-          if(JSONobj.brd2S == 'ON')
-          {
-            document.getElementById('btn2').innerHTML = JSONobj.brd2S;
-            document.getElementById('btn2').style.background = '#3e8e41';
-          }
-          else if(JSONobj.brd2S == 'OFF')
-          {
-            document.getElementById('btn2').innerHTML = JSONobj.brd2S;
-            document.getElementById('btn2').style.background='#d40505';
-          }
+       JSONobj = JSON.parse(evt.data);
+      
+       document.getElementById('board1V').innerHTML = JSONobj.brd1V;
+       document.getElementById('board1C').innerHTML = JSONobj.brd1C;
+       document.getElementById('board2V').innerHTML = JSONobj.brd2V;
+       document.getElementById('board2C').innerHTML = JSONobj.brd2C;
+       document.getElementById('board3V').innerHTML = JSONobj.brd3V;
+       document.getElementById('board3C').innerHTML = JSONobj.brd3C;
        
        
 
 
     }
-  }
-  
+    }
+
 
   function button()
      {
         
+        
         if(document.getElementById("btn").innerHTML == 'ON')
         {
-          btn = "brd1S=OFF";
+        document.getElementById("btn").innerHTML = 'OFF';
+        document.getElementById("btn").style.background = '#d40505';
         }
-        else if(document.getElementById("btn").innerHTML == 'OFF')
+        else if(document.getElementById('btn').innerHTML == 'OFF')
         {
-          btn = "brd1S=ON";
+            document.getElementById('btn').innerHTML = 'ON';
+            document.getElementById('btn').style.background = '#3e8e41';  
         }
-        websock.send(btn);
-     }
-
-  function button2()
-     {
         
-        if(document.getElementById("btn2").innerHTML == 'ON')
-        {
-          btn2 = "brd2S=OFF";
-        }
-        else if(document.getElementById("btn2").innerHTML == 'OFF')
-        {
-          btn2 = "brd2S=ON";
-        }
-        websock.send(btn2);
-     }  
+     }
 
 
 
