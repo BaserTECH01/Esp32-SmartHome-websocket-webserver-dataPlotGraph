@@ -20,8 +20,8 @@ def animate(i):
 
     plt.cla()
 
-    plt.plot(x, y1, label='board 1 V')
-    plt.plot(x, y2, label='BOARD 2 V')
+    #plt.plot(x, y1, label='board 1 V')
+    plt.plot(x, y2, label='BOARD 1 C')
    
 
     plt.legend(loc='upper left')

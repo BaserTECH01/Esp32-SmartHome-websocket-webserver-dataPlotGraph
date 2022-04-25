@@ -9,27 +9,31 @@
 #include <WebServer.h>
 #include <Arduino.h>
 #include <WiFi.h>
+#include <WiFiClient.h>
+#include <Update.h>
 #include <esp_wifi.h>
 #include <esp_now.h>
 #include <WebSocketsServer.h>
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 String JSONtxt;
-
+uint32_t last;
 #include "webpahe.h"
+#include "updateIndex.h"
 
 int board1_volt=0;
 int board2_volt=0;
 int board3_volt=0;
-int board1_Current=0;
-int board2_Current=0;
-int board3_Current=0;
+float board1_Current=0;
+float board2_Current=0;
+float board3_Current=0;
 
 boolean brd1S=false;
 boolean brd2S=false;
 boolean brd3S=false;
-int LED =2;
-int LED2 =4;
+int LED =4;
+int LED2 =5;
+int LED3 =18;
 
 
 
@@ -71,7 +75,7 @@ uint8_t BRD4MAC[] = {0x7C, 0x9E, 0xBD, 0x37, 0x28, 0x4C};
 typedef struct struct_message {
     int id;
     int Volt;
-    int Current;
+    float Current;
     boolean State;
     
 
@@ -138,6 +142,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
     {
       brd2S = false;
       if(val == "ON") brd2S = true;
+    }
+
+        if(var == "brd3S")
+    {
+      brd3S = false;
+      if(val == "ON") brd3S = true;
     }
     
   }
@@ -213,6 +223,7 @@ boardsStruct[myData.id-1].Volt = myData.Volt;
 if(myData.id==1){
     board1_volt=myData.Volt;
     board1_Current=myData.Current;
+    Serial.println(board1_Current);
   }
    else if(myData.id==2){
     board2_volt=myData.Volt;
@@ -270,6 +281,50 @@ void initEspNow() {
     
 }
 
+
+/*
+ * Server Index Page
+
+
+const char* serverIndex =
+"<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
+"<form method='POST' action='#' enctype='multipart/form-data' id='upload_form'>"
+   "<input type='file' name='update'>"
+        "<input type='submit' value='Update'>"
+    "</form>"
+ "<div id='prg'>progress: 0%</div>"
+ "<script>"
+  "$('form').submit(function(e){"
+  "e.preventDefault();"
+  "var form = $('#upload_form')[0];"
+  "var data = new FormData(form);"
+  " $.ajax({"
+  "url: '/update',"
+  "type: 'POST',"
+  "data: data,"
+  "contentType: false,"
+  "processData:false,"
+  "xhr: function() {"
+  "var xhr = new window.XMLHttpRequest();"
+  "xhr.upload.addEventListener('progress', function(evt) {"
+  "if (evt.lengthComputable) {"
+  "var per = evt.loaded / evt.total;"
+  "$('#prg').html('progress: ' + Math.round(per*100) + '%');"
+  "}"
+  "}, false);"
+  "return xhr;"
+  "},"
+  "success:function(d, s) {"
+  "console.log('success!')"
+ "},"
+ "error: function (a, b, c) {"
+ "}"
+ "});"
+ "});"
+ "</script>";
+ */
+
+
 // ----------------------------------------------------------------------------
 // Initialization
 // ----------------------------------------------------------------------------
@@ -279,6 +334,7 @@ void setup() {
     delay(500);
     pinMode(LED, OUTPUT);
     pinMode(LED2, OUTPUT);
+    pinMode(LED3, OUTPUT);
 
     initWiFi();
 // ESP-NOW'ı başlatıyoruz
@@ -286,6 +342,39 @@ void setup() {
 
 
   server.on("/", handleRoot);
+
+
+  server.on("/serverIndex", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex);
+  });
+  /*handling uploading firmware file */
+  server.on("/update", HTTP_POST, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+    ESP.restart();
+  }, []() {
+    HTTPUpload& upload = server.upload();
+    if (upload.status == UPLOAD_FILE_START) {
+      Serial.printf("Update: %s\n", upload.filename.c_str());
+      if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
+        Update.printError(Serial);
+      }
+    } else if (upload.status == UPLOAD_FILE_WRITE) {
+      /* flashing firmware to ESP*/
+      if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+        Update.printError(Serial);
+      }
+    } else if (upload.status == UPLOAD_FILE_END) {
+      if (Update.end(true)) { //true to set the size to the current progress
+        Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+      } else {
+        Update.printError(Serial);
+      }
+    }
+  });
+
+  
   server.begin(); webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 }
@@ -306,27 +395,39 @@ String board1Current = String(board1_Current);
 String board2Current = String(board2_Current);
 String board3Current = String(board3_Current);
 
-    //-----------------------------------------------
+    //1. led-----------------------------------------------
   if(brd1S == false) digitalWrite(LED, LOW);
   else digitalWrite(LED, HIGH);
   //-----------------------------------------------
   String BRD1status = "OFF";
   if(brd1S == true) BRD1status = "ON";
 
-      //-----------------------------------------------
-  if(brd2S == false) digitalWrite(LED2, HIGH);
-  else digitalWrite(LED2, LOW);
+      //2. led-----------------------------------------------
+  if(brd2S == false) digitalWrite(LED2, LOW);
+  else digitalWrite(LED2, HIGH);
   //-----------------------------------------------
   String BRD2status = "OFF";
   if(brd2S == true) BRD2status = "ON";
 
 
+      //3. led-----------------------------------------------
+  if(brd3S == false) digitalWrite(LED3, LOW);
+  else digitalWrite(LED3, HIGH);
+  //-----------------------------------------------
+  String BRD3status = "OFF";
+  if(brd3S == true) BRD3status = "ON";
+
+  
+    if (millis() - last > 1000) {
 
   JSONtxt  = "{\"brd1V\":\""+board1volt+"\",\"brd1C\":\""+board1Current+"\",\"brd1S\":\""+BRD1status+"\",";
   JSONtxt +=  "\"brd2V\":\""+board2volt+"\",\"brd2C\":\""+board2Current+"\",\"brd2S\":\""+BRD2status+"\",";
-  JSONtxt +=  "\"brd3V\":\""+board3volt+"\",\"brd3C\":\""+board3Current+"\"}";
+  JSONtxt +=  "\"brd3V\":\""+board3volt+"\",\"brd3C\":\""+board3Current+"\",\"brd3S\":\""+BRD3status+"\"}";
   
   webSocket.broadcastTXT(JSONtxt);
+
+          last = millis();
+    }
  /*
   JSONtxt2 = "{\"board2\":\""+board2volt+"\"}";
   webSocket.broadcastTXT(JSONtxt2); 
@@ -334,6 +435,7 @@ String board3Current = String(board3_Current);
   JSONtxt3 = "{\"board3\":\""+board3volt+"\"}";
   webSocket.broadcastTXT(JSONtxt3);   
   */
+   /*
   Serial.print("board 1 :");
   Serial.print(board1_volt);
   Serial.print("\t");
@@ -344,7 +446,7 @@ String board3Current = String(board3_Current);
   Serial.print(board3_volt);
   Serial.println();
 
-
+  */
    
 
 
