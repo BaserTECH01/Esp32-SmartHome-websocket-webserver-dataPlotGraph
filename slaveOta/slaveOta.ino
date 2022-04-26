@@ -1,7 +1,34 @@
 #include <Arduino.h>
+#include <WebServer.h>
+WebServer server(90);
 #include <WiFi.h>
+#include <WiFiClient.h>
+#include <Update.h>
 #include <esp_wifi.h>
 #include <esp_now.h>
+#include "updateIndex.h"
+
+#include <EEPROM.h>
+#define EEPROM_SIZE 1
+
+uint32_t last;
+
+long lastSample = 0;
+long sampleSum = 0;
+long sampleCount = 0;
+float vpc=0.8056640625;
+
+IPAddress local_IP(192, 168, 1, 44);
+// Gateway IP adres
+IPAddress gateway(192, 168, 1, 1);
+//Subnet
+IPAddress subnet(255, 255, 0, 0);
+
+constexpr char WIFI_SSID[] = "FiberHGW_ZTXF6D_2.4GHz";
+constexpr char WIFI_PASS[] = "tgzUCAdkAt";
+
+
+
 
 const int analogVoltPin = 32;
 const int analogCurrentPin = 35;
@@ -14,7 +41,7 @@ int relayledpin=19;
 typedef struct struct_message {
     int id;
     int Volt;
-    int Current;
+    float Current;
     boolean State;
 
 } struct_message;
@@ -38,7 +65,7 @@ led_message relayboard;
 // WiFi handling
 // ----------------------------------------------------------------------------
 
-constexpr char WIFI_SSID[] = "FiberHGW_ZTXF6D_2.4GHz";
+
 
 int32_t getWiFiChannel(const char *ssid) {
 
@@ -77,9 +104,11 @@ void onReceive(const uint8_t *mac_addr, const uint8_t *data, int len) {
 
 memcpy(&relayboard, data, sizeof(relayboard));
 
- if(relayboard.id==1){
   RelayState=relayboard.State;
-  }
+  EEPROM.write(0, RelayState);
+  EEPROM.commit();
+  digitalWrite(relaypin, RelayState);
+  digitalWrite(relayledpin, RelayState);
 }
 
 void initWiFi() {
@@ -93,6 +122,21 @@ void initWiFi() {
     esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
     esp_wifi_set_promiscuous(false);
     // WiFi.printDiag(Serial);
+     if (!WiFi.config(local_IP,gateway,subnet)) {
+    Serial.println("Statik ip ve gateway adres ayarlama başarısız oldu.");
+    }
+//Wifi bağlantısını başlatıyoruz.    
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+    Serial.printf("Bağlanılıyor :  %s .", WIFI_SSID);
+    while (WiFi.status() != WL_CONNECTED) { Serial.print("."); delay(200); }
+    Serial.println(" Wifi'a Bağlandı");
+
+    IPAddress ip = WiFi.localIP();
+
+    Serial.printf("SSID: %s\n", WIFI_SSID);
+    Serial.printf("Channel: %u\n", WiFi.channel());
+    Serial.printf("IP: %u.%u.%u.%u\n", ip & 0xff, (ip >> 8) & 0xff, (ip >> 16) & 0xff, ip >> 24);    
 }
 
 // ----------------------------------------------------------------------------
@@ -131,29 +175,63 @@ void setup() {
     pinMode(analogCurrentPin,INPUT);
     pinMode(relaypin,OUTPUT);
     pinMode(relayledpin,OUTPUT);
-    
+    EEPROM.begin(EEPROM_SIZE);
+    RelayState = EEPROM.read(0);
+    digitalWrite(relaypin, RelayState);
+    digitalWrite(relayledpin, RelayState);
+    delay(500);
     initWiFi();
+    delay(500);
     initEspNow();
+    delay(500);
+    myData.id=1;
+    
+    server.on("/serverIndex", HTTP_GET, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/html", serverIndex);
+  });
+  /*handling uploading firmware file */
+  server.on("/update", HTTP_POST, []() {
+    server.sendHeader("Connection", "close");
+    server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+    ESP.restart();
+  }, []() {
+    HTTPUpload& upload = server.upload();
+    if (upload.status == UPLOAD_FILE_START) {
+      Serial.printf("Update: %s\n", upload.filename.c_str());
+      if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
+        Update.printError(Serial);
+      }
+    } else if (upload.status == UPLOAD_FILE_WRITE) {
+      /* flashing firmware to ESP*/
+      if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+        Update.printError(Serial);
+      }
+    } else if (upload.status == UPLOAD_FILE_END) {
+      if (Update.end(true)) { //true to set the size to the current progress
+        Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+      } else {
+        Update.printError(Serial);
+      }
+    }
+  });
+
+  
+  server.begin(); 
 }
 
 // ----------------------------------------------------------------------------
 // Main control loop
 // ----------------------------------------------------------------------------
 
-uint32_t last;
+
 
 void loop() {
-  getReadings();
-  myData.id=1;
-  myData.Volt = gridVolt;
-  myData.Current= current;
-  digitalWrite(relaypin, RelayState);
-  digitalWrite(relayledpin, RelayState);
+  server.handleClient();
 
   
-    if (millis() - last > 1) {
-        
-        
+    if (millis() - last > 1000) {
+        getReadings();
         esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &myData, sizeof(myData));
         
         Serial.printf("sent: %3u on channel: %u\n", myData, WiFi.channel());
@@ -168,7 +246,25 @@ void loop() {
 }
 
 void getReadings(){
-    gridVolt = analogRead(analogVoltPin);
-    current = analogRead(analogCurrentPin);
 
+    for(int i=0; i<1000; i++){
+      sampleSum += sq(analogRead(analogCurrentPin)-1410);
+      sampleCount++;      
+    }
+    if(sampleCount==1000){
+      //ortalama alma  //rms hesaplama 
+      float mean = sampleSum/sampleCount;
+      float value = sqrt(mean);
+      float mv=value*vpc;
+      float factor=23.29411;
+      float amper=mv/factor;
+      float watt = amper*220;
+      myData.Current= amper;
+      myData.Volt= watt;
+
+      sampleCount=0;
+      sampleSum=0;
+    }
+    
+   
 }
