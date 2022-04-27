@@ -14,7 +14,8 @@ WebServer server(90);
 uint32_t last;
 
 long lastSample = 0;
-long sampleSum = 0;
+//long sampleSum = 0;
+long sampleMax = 0;
 long sampleCount = 0;
 float vpc=0.8056640625;
 
@@ -228,10 +229,34 @@ void setup() {
 
 void loop() {
   server.handleClient();
-
+ // Serial.println(analogRead(analogCurrentPin));
+ if(millis()> lastSample +1 ){
+  int thisSample=analogRead(analogCurrentPin)-1340;
+      //sampleSum += sq(analogRead(analogCurrentPin)-1340);
+      if(thisSample>sampleMax){
+        sampleMax=thisSample;
+      }
+      sampleCount++;   
+      lastSample= millis();   
+    }
+    if(sampleCount==1000){
+      //ortalama alma  //rms hesaplama 
+      //float mean = sampleSum/sampleCount;
+      //float value = sqrt(mean);
+      float peakMv=sampleMax*vpc;
+      float avgMv=peakMv*0.707; //RMS
+     
+      //float factor=23.29411;
+      float amper=avgMv/66;
+      float watt = amper*220;
+      myData.Current= amper;
+      myData.Volt= watt;
+      sampleCount=0;
+      sampleMax=0;
+    }
   
     if (millis() - last > 1000) {
-        getReadings();
+       
         esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &myData, sizeof(myData));
         
         Serial.printf("sent: %3u on channel: %u\n", myData, WiFi.channel());
@@ -243,28 +268,4 @@ void loop() {
          }
         last = millis();
     }
-}
-
-void getReadings(){
-
-    for(int i=0; i<1000; i++){
-      sampleSum += sq(analogRead(analogCurrentPin)-1410);
-      sampleCount++;      
-    }
-    if(sampleCount==1000){
-      //ortalama alma  //rms hesaplama 
-      float mean = sampleSum/sampleCount;
-      float value = sqrt(mean);
-      float mv=value*vpc;
-      float factor=23.29411;
-      float amper=mv/factor;
-      float watt = amper*220;
-      myData.Current= amper;
-      myData.Volt= watt;
-
-      sampleCount=0;
-      sampleSum=0;
-    }
-    
-   
 }
