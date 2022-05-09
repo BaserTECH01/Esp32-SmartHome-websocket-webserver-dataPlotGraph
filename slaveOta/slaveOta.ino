@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <Filters.h>                      //This library does a massive work check it's .cpp file
+
 #include <WebServer.h>
 WebServer server(90);
 #include <WiFi.h>
@@ -13,11 +15,23 @@ WebServer server(90);
 
 uint32_t last;
 
-long lastSample = 0;
-//long sampleSum = 0;
-long sampleMax = 0;
-long sampleCount = 0;
-float vpc=0.8056640625;
+float ACS_Value;                              //Here we keep the raw data valuess
+float testFrequency = 50;                    // test signal frequency (Hz)
+float windowLength = 40.0/testFrequency;     // how long to average the signal, for statistist
+
+
+
+float intercept = 0; // to be adjusted based on calibration testing
+float slope = 0.01626; // to be adjusted based on calibration testing
+                      //Please check the ACS712 Tutorial video by SurtrTech to see how to get them because it depends on your sensor, or look below
+
+
+float Amps_TRMS; // estimated actual current in amps
+
+unsigned long printPeriod = 1000; // in milliseconds
+// Track time in milliseconds since last reading 
+unsigned long previousMillis = 0;
+
 
 IPAddress local_IP(192, 168, 1, 44);
 // Gateway IP adres
@@ -32,7 +46,7 @@ constexpr char WIFI_PASS[] = "tgzUCAdkAt";
 
 
 const int analogVoltPin = 32;
-const int analogCurrentPin = 35;
+#define ACS_Pin 35 
 int gridVolt = 0;
 int current =0;  
 String success;
@@ -173,7 +187,7 @@ void initEspNow() {
 void setup() {
     Serial.begin(115200);
     pinMode(analogVoltPin,INPUT);
-    pinMode(analogCurrentPin,INPUT);
+      pinMode(ACS_Pin,INPUT); 
     pinMode(relaypin,OUTPUT);
     pinMode(relayledpin,OUTPUT);
     EEPROM.begin(EEPROM_SIZE);
@@ -230,32 +244,28 @@ void setup() {
 void loop() {
   server.handleClient();
  // Serial.println(analogRead(analogCurrentPin));
- if(millis()> lastSample +1 ){
-  int thisSample=analogRead(analogCurrentPin)-1340;
-      //sampleSum += sq(analogRead(analogCurrentPin)-1340);
-      if(thisSample>sampleMax){
-        sampleMax=thisSample;
-      }
-      sampleCount++;   
-      lastSample= millis();   
-    }
-    if(sampleCount==1000){
-      //ortalama alma  //rms hesaplama 
-      //float mean = sampleSum/sampleCount;
-      //float value = sqrt(mean);
-      float peakMv=sampleMax*vpc;
-      float avgMv=peakMv*0.707; //RMS
-     
-      //float factor=23.29411;
-      float amper=avgMv/66;
-      float watt = amper*220;
-      myData.Current= amper;
+
+  RunningStatistics inputStats;                 // create statistics to look at the raw test signal
+  inputStats.setWindowSecs( windowLength );     //Set the window length
+   
+  while( true ) {   
+    ACS_Value = analogRead(ACS_Pin);  // read the analog in value:
+    inputStats.input(ACS_Value);  // log to Stats function
+        
+    if((unsigned long)(millis() - previousMillis) >= printPeriod) { //every second we do the calculation
+      previousMillis = millis();   // update time
+      
+      Amps_TRMS = intercept + slope * inputStats.sigma();
+
+      Serial.print( "\t Amps: " ); 
+      Serial.println( Amps_TRMS );
+      float watt = Amps_TRMS*220;
+      myData.Current= Amps_TRMS;
       myData.Volt= watt;
-      sampleCount=0;
-      sampleMax=0;
+
+
     }
-  
-    if (millis() - last > 1000) {
+        if (millis() - last > 999) {
        
         esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &myData, sizeof(myData));
         
@@ -268,4 +278,38 @@ void loop() {
          }
         last = millis();
     }
+  }
+
+ 
+ /*if(millis()> lastSample +1 ){
+  int thisSample=analogRead(analogCurrentPin);
+      //sampleSum += sq(analogRead(analogCurrentPin)-1340);
+      if(thisSample>sampleMax){
+        sampleMax=thisSample;
+      }
+      if(thisSample<sampleMin){
+        sampleMin=thisSample;
+      }
+      sampleCount++;   
+      lastSample= millis();   
+    }
+    if(sampleCount==1000){
+      //ortalama alma  //rms hesaplama 
+      //float mean = sampleSum/sampleCount;
+      //float value = sqrt(mean);
+      float peakMv=sampleMax-sampleMin;
+      //float avgMv=peakMv*0.707; //RMS
+     
+      //float factor=23.29411;
+      float amper=peakMv;//avgMv/100;
+      float watt = amper*220;
+      myData.Current= amper;
+      myData.Volt= watt;
+      sampleCount=0;
+      sampleMax=0;
+    }
+  */
+
+  
+
 }
