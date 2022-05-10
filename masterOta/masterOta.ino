@@ -62,9 +62,10 @@ constexpr char WIFI_PASS[] = "tgzUCAdkAt";
 // Veri gÖnderme başarılı ise çağrılacak değişken
 String success;
 esp_now_peer_info_t peerInfo;
-
+esp_now_peer_info_t peerInfo_2;
 
 constexpr uint8_t ESP_NOW_RECEIVER[] = { 0x30, 0xAE, 0xA4, 0x00, 0x40, 0xBC };
+constexpr uint8_t ESP_NOW_RECEIVER_2[] = { 0x30, 0xAE, 0xA4, 0x00, 0x3B, 0x08 };
 uint8_t BRD2MAC[] = {0x7C, 0x9E, 0xBD, 0x37, 0x28, 0x4C};
 uint8_t BRD3MAC[] = {0x7C, 0x9E, 0xBD, 0x37, 0x28, 0x4C};
 uint8_t BRD4MAC[] = {0x7C, 0x9E, 0xBD, 0x37, 0x28, 0x4C};
@@ -90,7 +91,11 @@ typedef struct led_message {
 } led_message;
 // Create a struct_message called BME280Readings to hold sensor readings
 
-led_message relayboard;
+led_message relayboard_1;
+led_message relayboard_2;
+led_message relayboard_3;
+
+
 struct_message myData;
 
 struct_message board1;
@@ -119,9 +124,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
     {
       brd1S = false;
       if(val == "ON") brd1S = true;
-      relayboard.State=brd1S;
-      relayboard.id=1;
-      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard, sizeof(relayboard));
+      relayboard_1.State=brd1S;
+      relayboard_1.id=1;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard_1, sizeof(relayboard_1));
         
         Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
     if (result == ESP_OK) {
@@ -142,6 +147,18 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
     {
       brd2S = false;
       if(val == "ON") brd2S = true;
+      relayboard_2.State=brd2S;
+      relayboard_2.id=2;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+        
+        Serial.printf("sent: %3u on channel: %u\n", board2, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+      
     }
 
         if(var == "brd3S")
@@ -266,12 +283,12 @@ void initEspNow() {
         Serial.println("ESP NOW pairing failure");
         while (1); }
         
-/*
-    memcpy(peerInfo.peer_addr, BRD2MAC, 6);
-    if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+
+    memcpy(peerInfo_2.peer_addr, ESP_NOW_RECEIVER_2, 6);
+    if (esp_now_add_peer(&peerInfo_2) != ESP_OK) {
         Serial.println("ESP NOW pairing failure");
         while (1); }
-*/        
+       
 /*
     memcpy(peerInfo.peer_addr, BRD2MAC, 6);
     if (esp_now_add_peer(&peerInfo) != ESP_OK) {
