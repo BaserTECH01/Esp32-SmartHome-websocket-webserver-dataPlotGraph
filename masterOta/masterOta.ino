@@ -82,6 +82,7 @@ typedef struct struct_message {
 
 } struct_message;
 
+struct_message myData;
 
 typedef struct led_message {
     int id;
@@ -89,20 +90,13 @@ typedef struct led_message {
     
 
 } led_message;
-// Create a struct_message called BME280Readings to hold sensor readings
 
 led_message relayboard_1;
 led_message relayboard_2;
 led_message relayboard_3;
 
 
-struct_message myData;
 
-struct_message board1;
-struct_message board2;
-struct_message board3;
-
-struct_message boardsStruct[3] = {board1, board2, board3};
 
 
 
