@@ -98,6 +98,11 @@ led_message relayboard_3;
 
 
 
+struct_message board1;
+struct_message board2;
+struct_message board3;
+
+struct_message boardsStruct[3] = {board1, board2, board3};
 
 
 
