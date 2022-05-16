@@ -121,9 +121,11 @@ input:checked + .slider:before {
  <center>
  <a href="http://192.168.1.43/serverIndex" target="_blank" rel="noopener noreferrer">
  <button class="button" style="background-color:rgb(3, 30, 223)" >Update for firmware of master</button>
+ 
  </a>
   <a href="http://192.168.1.44:90/serverIndex" target="_blank" rel="noopener noreferrer">
  <button class="button" style="background-color:rgb(3, 115, 3)" >Update for firmware of Slave </button>
+ <p>Updated from ngrok tunnel</p>
  </a>
  <div >
  <a style=rgba(128,128,128,0.322) ></a>
