@@ -6,13 +6,15 @@
 
 
 
-#include <WebServer.h>
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <Update.h>
 #include <esp_wifi.h>
 #include <esp_now.h>
+
+#include <WebServer.h>
 #include <WebSocketsServer.h>
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -24,13 +26,13 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 //Variables of Board1
 
 String brd1Mode=String("Manuel"); //Board'un Timer mode da mı Manuel Mode damı kullanılacağı bilgisinin kaydedileceği değişken (varsayılan manuel) 
-String brdmode1="0"; //birinci zaman
-boolean brd1S=false; //Board da bulunan rölenin durumu bilgisinin kaydedileceği değişken
-int board1_volt=0; //Board'un volt değeri bilgisinin kaydedileceği değişken
-float board1_Current=0; //Board'un akım değeri bilgisinin kaydedileceği değişken
-uint32_t lastmessage1; //Boarddan gelen en son mesajın zamanının kaydedileceği değişken
+String brdmode1="0";              //birinci zaman
+boolean brd1S=false;              //Board da bulunan rölenin durumu bilgisinin kaydedileceği değişken
+int board1_volt=0;                //Board'un volt değeri bilgisinin kaydedileceği değişken
+float board1_Current=0;           //Board'un akım değeri bilgisinin kaydedileceği değişken
+uint32_t lastmessage1;            //Boarddan gelen en son mesajın zamanının kaydedileceği değişken
 String brd1ConnectStatus = String("No Connection"); // Board'un bağlantı durumu bilgisinin kaydedileceği değişken
-String JSONboard1; // Board 1 ile ilgili bilgilerin JSON formatında kaydedileceği değişken (Bu değişken Websocket ile yayınlanacak)
+String JSONboard1;                // Board 1 ile ilgili bilgilerin JSON formatında kaydedileceği değişken (Bu değişken Websocket ile yayınlanacak)
 
 String JSONtxt;
 
@@ -315,13 +317,13 @@ void initEspNow() {
     peerInfo.ifidx   = WIFI_IF_STA;
     peerInfo.encrypt = false;
     if (esp_now_add_peer(&peerInfo) != ESP_OK) {
-        Serial.println("ESP NOW pairing failure");
+        Serial.println("ESP NOW 1 pairing failure");
         while (1); }
         
 
     memcpy(peerInfo_2.peer_addr, ESP_NOW_RECEIVER_2, 6);
     if (esp_now_add_peer(&peerInfo_2) != ESP_OK) {
-        Serial.println("ESP NOW pairing failure");
+        Serial.println("ESP NOW 2 pairing failure");
         while (1); }
        
 /*
@@ -334,47 +336,6 @@ void initEspNow() {
 }
 
 
-/*
- * Server Index Page
-
-
-const char* serverIndex =
-"<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
-"<form method='POST' action='#' enctype='multipart/form-data' id='upload_form'>"
-   "<input type='file' name='update'>"
-        "<input type='submit' value='Update'>"
-    "</form>"
- "<div id='prg'>progress: 0%</div>"
- "<script>"
-  "$('form').submit(function(e){"
-  "e.preventDefault();"
-  "var form = $('#upload_form')[0];"
-  "var data = new FormData(form);"
-  " $.ajax({"
-  "url: '/update',"
-  "type: 'POST',"
-  "data: data,"
-  "contentType: false,"
-  "processData:false,"
-  "xhr: function() {"
-  "var xhr = new window.XMLHttpRequest();"
-  "xhr.upload.addEventListener('progress', function(evt) {"
-  "if (evt.lengthComputable) {"
-  "var per = evt.loaded / evt.total;"
-  "$('#prg').html('progress: ' + Math.round(per*100) + '%');"
-  "}"
-  "}, false);"
-  "return xhr;"
-  "},"
-  "success:function(d, s) {"
-  "console.log('success!')"
- "},"
- "error: function (a, b, c) {"
- "}"
- "});"
- "});"
- "</script>";
- */
 
 
 // ----------------------------------------------------------------------------
@@ -483,6 +444,7 @@ String strtbrd1ConnectStatus = String(brd1ConnectStatus);
     if (millis() - last > 1000) {
 Serial.print(brd2ConnectStatus);
 Serial.println(brdmode1);
+
   JSONboard1  = "{\"brd1M\":\""+brd1Mode+"\",";
   JSONboard1 +=  "\"brd1V\":\""+board1volt+"\",";
   JSONboard1 +=  "\"brd1C\":\""+board1Current+"\",";
