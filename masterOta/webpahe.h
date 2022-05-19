@@ -141,34 +141,37 @@ input:checked + .slider:before {
     <th>1.State</th>
     <th>2.State</th>
   </tr>
+  
   <tr style="height:100px">
-    <td>Board 1</td>
+    <td><p>board1</p><p style="color:red;" id="brd1connectStatus" >Connection</p></td>
     <td><span style="color:rgb(216, 3, 3)" id="board1V">0</span> W </td>
     <td><span style="color:rgb(15, 56, 245)" id="board1C">0</span> A</td>
-    <th><button class="button"  id="btn"  onclick="button()" > </button></td>
-    <th><p id="mode1"></p><label class="switch"> 
-  <input type="checkbox">
-  <span class="slider"></span>
-</label></td>
-  </tr>
+    <th><p id="mdds1"></p><button class="button"  id="btn"  onclick="button()" > </button></td>
+    <th><button class="button"  id="Mbtn1"  onclick="Mod1()" ></button></td>
+    <th><button onclick="sendinput()">send</button> <input type ="number" disabled="true" id="brd1mod1" ></input></td>
+  </tr> 
+    
   <tr style="height:100px">
-    <td>Board 2</td>
-    <td><span style="color:rgb(216, 3, 3)" id="board2V">0</span> V </td>
+    <td><p>board2</p><p style="color:red;" id="brd2connectStatus" >Connection</p></td>
+    <td><span style="color:rgb(216, 3, 3)" id="board2V">0</span> W </td>
     <td><span style="color:rgb(15, 56, 245)" id="board2C">0</span> A</td>
     <th><button class="button"  id="btn2"  onclick="button2()" > </button></td>
   </tr>
+  
   <tr style="height:100px">
     <td>Board 3</td>
     <td><span style="color:rgb(216, 3, 3)" id="board3V">0</span> V </td>
     <td><span style="color:rgb(15, 56, 245)" id="board3C">0</span> A</td>
     <th><button class="button"  id="btn3"  onclick="button3()" > </button></td>
   </tr>
+  
   <tr style="height:100px">
     <td>Board 4</td>
     <td><span style="color:rgb(216, 3, 3)" id="board4V">0</span> V </td>
     <td><span style="color:rgb(15, 56, 245)" id="board4C">0</span> A</td>
     <th>ON</td>
   </tr>
+  
   <tr style="height:100px">
     <td>Board 5</td>
     <td><span style="color:rgb(216, 3, 3)" id="board5V">0</span> V </td>
@@ -301,13 +304,76 @@ input:checked + .slider:before {
     {
       
       JSONobj = JSON.parse(evt.data);
+      
+        if(JSONobj.brd1V){
+
+
+          document.getElementById('board1V').innerHTML = JSONobj.brd1V;
+          document.getElementById('board1C').innerHTML = JSONobj.brd1C;
           
-           document.getElementById('board1V').innerHTML = JSONobj.brd1V;
-           document.getElementById('board1C').innerHTML = JSONobj.brd1C;
+          if(JSONobj.brd1M=='Manuel'){
+          document.getElementById("btn").disabled = false;
+          document.getElementById("brd1mod1").disabled = true;
+          document.getElementById('mdds1').innerHTML = '';
+          document.getElementById('Mbtn1').innerHTML = JSONobj.brd1M;
+          document.getElementById('Mbtn1').style.background = 'blue';
+          }
+          
+          if(JSONobj.brd1M=='Timer'){
+            
+            document.getElementById("brd1mod1").disabled = false;
+            document.getElementById("btn").disabled = true;
+            document.getElementById('mdds1').innerHTML = 'Disabled';
+            document.getElementById('Mbtn1').innerHTML = JSONobj.brd1M;
+            document.getElementById('Mbtn1').style.background = 'grey';
+          }
+
+
+
+          if(JSONobj.brd1ConnectSt == 'Connected')
+          {
+            document.getElementById('brd1connectStatus').innerHTML = JSONobj.brd1ConnectSt;
+            document.getElementById('brd1connectStatus').style.color = '#3e8e41';
+          }
+
+           if(JSONobj.brd1ConnectSt == 'No Connection')
+          {
+            document.getElementById('brd1connectStatus').innerHTML = JSONobj.brd1ConnectSt;
+            document.getElementById('brd1connectStatus').style.color = '#d40505';
+          }
+          
+        }
+
+        //----------------Board---2-------------------------
+          if(JSONobj.brd2V)
+          {
+
            document.getElementById('board2V').innerHTML = JSONobj.brd2V;
            document.getElementById('board2C').innerHTML = JSONobj.brd2C;
+           
+           if(JSONobj.brd2ConnectSt == 'Connected')
+          {
+            document.getElementById('brd2connectStatus').innerHTML = JSONobj.brd2ConnectSt;
+            document.getElementById('brd2connectStatus').style.color = '#3e8e41';
+          }
+
+           if(JSONobj.brd2ConnectSt == 'No Connection')
+          {
+            document.getElementById('brd2connectStatus').innerHTML = JSONobj.brd2ConnectSt;
+            document.getElementById('brd2connectStatus').style.color = '#d40505';
+          }
+
+          }
+
+
+          //---------------Board--3-----------
+
+       if(JSONobj.brd3V){   
+           
+           
            document.getElementById('board3V').innerHTML = JSONobj.brd3V;
            document.getElementById('board3C').innerHTML = JSONobj.brd3C;
+       }
           
           //1. BUTON
           if(JSONobj.brd1S == 'ON')
@@ -394,7 +460,29 @@ input:checked + .slider:before {
           btn3 = "brd3S=ON";
         }
         websock.send(btn3);
-     }     
+     } 
+
+    function Mod1()
+    {
+      if(document.getElementById("Mbtn1").innerHTML == 'Timer')
+        {
+          Mbtn1 = "Mode1=Manuel";
+        }
+        else if(document.getElementById("Mbtn1").innerHTML == 'Manuel')
+        {
+          Mbtn1 = "Mode1=Timer";
+        }
+        websock.send(Mbtn1);
+           
+    }
+
+    function sendinput()
+    {
+       
+       sendinput1 = "inputbrd1="+document.getElementById("brd1mod1").value; 
+       console.log(sendinput1);
+      websock.send(sendinput1);
+    }
 
 
 

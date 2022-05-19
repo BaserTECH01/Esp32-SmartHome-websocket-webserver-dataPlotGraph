@@ -16,21 +16,45 @@
 #include <WebSocketsServer.h>
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
-String JSONtxt;
-uint32_t last;
+
 #include "webpahe.h"
 #include "updateIndex.h"
 
-int board1_volt=0;
+
+//Variables of Board1
+
+String brd1Mode=String("Manuel"); //Board'un Timer mode da mı Manuel Mode damı kullanılacağı bilgisinin kaydedileceği değişken (varsayılan manuel) 
+String brdmode1="0"; //birinci zaman
+boolean brd1S=false; //Board da bulunan rölenin durumu bilgisinin kaydedileceği değişken
+int board1_volt=0; //Board'un volt değeri bilgisinin kaydedileceği değişken
+float board1_Current=0; //Board'un akım değeri bilgisinin kaydedileceği değişken
+uint32_t lastmessage1; //Boarddan gelen en son mesajın zamanının kaydedileceği değişken
+String brd1ConnectStatus = String("No Connection"); // Board'un bağlantı durumu bilgisinin kaydedileceği değişken
+String JSONboard1; // Board 1 ile ilgili bilgilerin JSON formatında kaydedileceği değişken (Bu değişken Websocket ile yayınlanacak)
+
+String JSONtxt;
+
+uint32_t last;
+
+uint32_t lastmessage2;
+
+String brd2Mode=String("Manuel");
+
+
 int board2_volt=0;
 int board3_volt=0;
-float board1_Current=0;
+
+
 float board2_Current=0;
 float board3_Current=0;
 
-boolean brd1S=false;
+
 boolean brd2S=false;
 boolean brd3S=false;
+
+String brd2ConnectStatus = String("No Connection");
+String brd3ConnectStatus = String("No Connection");
+
 int LED =4;
 int LED2 =5;
 int LED3 =18;
@@ -119,6 +143,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
     String val = payloadString.substring(separator+1);
 
 
+    if(var == "Mode1")
+    {
+      if(val == "Manuel") brd1Mode = String("Manuel");
+      if(val == "Timer" ) brd1Mode = String("Timer");
+    }
+
     if(var == "brd1S")
     {
       brd1S = false;
@@ -134,11 +164,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
     else {
       Serial.println("Error sending the data");
          }
-
-
-      
-
-
       
     }
 
@@ -164,6 +189,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
     {
       brd3S = false;
       if(val == "ON") brd3S = true;
+    }
+
+
+    if(var == "inputbrd1")
+    {
+      brdmode1 = val;
+      Serial.println(brdmode1);
     }
     
   }
@@ -237,11 +269,15 @@ memcpy(&myData, data, sizeof(myData));
 boardsStruct[myData.id-1].Volt = myData.Volt;
 
 if(myData.id==1){
+    brd1ConnectStatus=String("Connected");
+    lastmessage1=millis();
     board1_volt=myData.Volt;
     board1_Current=myData.Current;
     Serial.println(board1_Current);
   }
    else if(myData.id==2){
+    lastmessage2=millis();
+    brd2ConnectStatus=String("Connected");
     board2_volt=myData.Volt;
     board2_Current=myData.Current;
   }
@@ -411,7 +447,10 @@ String board1Current = String(board1_Current);
 String board2Current = String(board2_Current);
 String board3Current = String(board3_Current);
 
-    //1. led-----------------------------------------------
+String strtbrd1ConnectStatus = String(brd1ConnectStatus);
+
+
+    //1. board-----------------------------------------------
   if(brd1S == false) digitalWrite(LED, LOW);
   else digitalWrite(LED, HIGH);
   //-----------------------------------------------
@@ -433,11 +472,28 @@ String board3Current = String(board3_Current);
   String BRD3status = "OFF";
   if(brd3S == true) BRD3status = "ON";
 
-  
-    if (millis() - last > 1000) {
 
-  JSONtxt  = "{\"brd1V\":\""+board1volt+"\",\"brd1C\":\""+board1Current+"\",\"brd1S\":\""+BRD1status+"\",";
-  JSONtxt +=  "\"brd2V\":\""+board2volt+"\",\"brd2C\":\""+board2Current+"\",\"brd2S\":\""+BRD2status+"\",";
+  if (millis() - lastmessage2 > 5000) {
+    brd2ConnectStatus=String("No Connection");
+  }
+
+    if (millis() - lastmessage1 > 5000) {
+    brd1ConnectStatus=String("No Connection");
+  }
+    if (millis() - last > 1000) {
+Serial.print(brd2ConnectStatus);
+Serial.println(brdmode1);
+  JSONboard1  = "{\"brd1M\":\""+brd1Mode+"\",";
+  JSONboard1 +=  "\"brd1V\":\""+board1volt+"\",";
+  JSONboard1 +=  "\"brd1C\":\""+board1Current+"\",";
+  JSONboard1 +=  "\"brd1S\":\""+BRD1status+"\",";
+  JSONboard1 +=  "\"brd1ConnectSt\":\""+brd1ConnectStatus+"\"    }";
+
+                
+  webSocket.broadcastTXT(JSONboard1);
+  
+  
+  JSONtxt =  "{\"brd2V\":\""+board2volt+"\",\"brd2C\":\""+board2Current+"\",\"brd2S\":\""+BRD2status+"\",\"brd2ConnectSt\":\""+brd2ConnectStatus+"\",";
   JSONtxt +=  "\"brd3V\":\""+board3volt+"\",\"brd3C\":\""+board3Current+"\",\"brd3S\":\""+BRD3status+"\"}";
   
   webSocket.broadcastTXT(JSONtxt);
