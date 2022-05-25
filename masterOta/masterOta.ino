@@ -237,10 +237,14 @@ void initWiFi() {
    esp_wifi_set_promiscuous(true);
    esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
    esp_wifi_set_promiscuous(false);
+
+   /*
 //Burada üst kısımda belirlediğimiz statik ip ve gateway adreslerini ayarlıyoruz.
      if (!WiFi.config(local_IP,gateway,subnet)) {
     Serial.println("Statik ip ve gateway adres ayarlama başarısız oldu.");
     }
+
+    */
 
 //Wifi bağlantısını başlatıyoruz.    
     WiFi.begin(WIFI_SSID, WIFI_PASS);
