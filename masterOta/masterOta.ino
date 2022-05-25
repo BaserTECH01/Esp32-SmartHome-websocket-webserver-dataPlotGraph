@@ -23,6 +23,7 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 #include "updateIndex.h"
 
 
+
 //Variables of Board1
 
 String brd1Mode=String("Manuel"); //Board'un Timer mode da mı Manuel Mode damı kullanılacağı bilgisinin kaydedileceği değişken (varsayılan manuel) 
