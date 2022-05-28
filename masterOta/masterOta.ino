@@ -4,8 +4,8 @@
 // ESP-NOW receiver acting as a WiFi gateway to the Internet
 // ----------------------------------------------------------------------------
 
-
-
+#include <virtuabotixRTC.h> 
+virtuabotixRTC myRTC(13, 12, 14);
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -27,7 +27,10 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 //Variables of Board1
 
 String brd1Mode=String("Manuel"); //Board'un Timer mode da mı Manuel Mode damı kullanılacağı bilgisinin kaydedileceği değişken (varsayılan manuel) 
-String brdmode1="0";              //birinci zaman
+int m1basdk;
+int m1sondk; 
+int brd1m2basdk;
+int brd1m2sondk;
 boolean brd1S=false;              //Board da bulunan rölenin durumu bilgisinin kaydedileceği değişken
 int board1_volt=0;                //Board'un volt değeri bilgisinin kaydedileceği değişken
 float board1_Current=0;           //Board'un akım değeri bilgisinin kaydedileceği değişken
@@ -137,19 +140,38 @@ struct_message boardsStruct[3] = {board1, board2, board3};
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welength)
 {
   String payloadString = (const char *)payload;
-
+Serial.println(payloadString);
 
   if(type == WStype_TEXT) //receive text from client
   {
     byte separator=payloadString.indexOf('=');
+    byte separator2=payloadString.indexOf('=',separator+1);
+    byte separator3=payloadString.indexOf('=',separator2+1);
     String var = payloadString.substring(0,separator);
     String val = payloadString.substring(separator+1);
+    String val2 = payloadString.substring(separator2+1,separator3-3);
+    String val3 = payloadString.substring(separator3+1);
 
-
+    if(var == "inputbrd1")
+    {
+     m1basdk= val2.toInt();
+     m1sondk= val3.toInt();
+    }
+    
+    if(var == "brd1time2")
+    {
+     brd1m2basdk= val2.toInt();
+     brd1m2sondk= val3.toInt();
+    }
+    
     if(var == "Mode1")
     {
-      if(val == "Manuel") brd1Mode = String("Manuel");
-      if(val == "Timer" ) brd1Mode = String("Timer");
+      if(val == "Manuel"){
+        brd1Mode = String("Manuel");
+      }
+      if(val == "Timer" ){
+        brd1Mode = String("Timer");
+      }
     }
 
     if(var == "brd1S")
@@ -195,11 +217,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t welengt
     }
 
 
-    if(var == "inputbrd1")
-    {
-      brdmode1 = val;
-      Serial.println(brdmode1);
-    }
+
     
   }
 
@@ -239,13 +257,13 @@ void initWiFi() {
    esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
    esp_wifi_set_promiscuous(false);
 
-   /*
+
 //Burada üst kısımda belirlediğimiz statik ip ve gateway adreslerini ayarlıyoruz.
      if (!WiFi.config(local_IP,gateway,subnet)) {
     Serial.println("Statik ip ve gateway adres ayarlama başarısız oldu.");
     }
 
-    */
+
 
 //Wifi bağlantısını başlatıyoruz.    
     WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -405,6 +423,14 @@ void loop() {
   
   webSocket.loop(); server.handleClient();
 
+myRTC.updateTime();
+int saat= myRTC.hours;
+int dkk = myRTC.minutes;
+int dk= saat * 60 + dkk;
+
+
+
+
 String board1volt = String(board1_volt);
 String board2volt = String(board2_volt);
 String board3volt = String(board3_volt);
@@ -420,8 +446,10 @@ String strtbrd1ConnectStatus = String(brd1ConnectStatus);
   if(brd1S == false) digitalWrite(LED, LOW);
   else digitalWrite(LED, HIGH);
   //-----------------------------------------------
+  
   String BRD1status = "OFF";
-  if(brd1S == true) BRD1status = "ON";
+  if(brd1S == true && brd1Mode == "Manuel") BRD1status = "ON";
+  if(brd1Mode == "Timer")BRD1status = "disabled";
 
       //2. led-----------------------------------------------
   if(brd2S == false) digitalWrite(LED2, LOW);
@@ -447,8 +475,16 @@ String strtbrd1ConnectStatus = String(brd1ConnectStatus);
     brd1ConnectStatus=String("No Connection");
   }
     if (millis() - last > 1000) {
-Serial.print(brd2ConnectStatus);
-Serial.println(brdmode1);
+Serial.println(brd2ConnectStatus);
+Serial.println(dk);
+Serial.print("bas1:");
+Serial.println(m1basdk);
+Serial.print("son1:");
+Serial.println(m1sondk);
+Serial.print("bas2:");
+Serial.println(brd1m2basdk);
+Serial.print("son2:");
+Serial.println(brd1m2sondk);
 
   JSONboard1  = "{\"brd1M\":\""+brd1Mode+"\",";
   JSONboard1 +=  "\"brd1V\":\""+board1volt+"\",";
@@ -465,27 +501,74 @@ Serial.println(brdmode1);
   
   webSocket.broadcastTXT(JSONtxt);
 
+
+///////////////////////////////////////////////////
+////////////////////////////////////////////////
+//TIME
+/////////////////////////////////////////////////
+
+if (m1basdk <= dk && m1sondk >= dk && brd1Mode == "Timer"){
+  brd1S=true;
+  brd2S=true;
+
+        relayboard_2.State=brd2S;
+      relayboard_2.id=2;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+        
+        Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}
+else if (brd1m2basdk <= dk && brd1m2sondk >= dk && brd1Mode == "Timer"){
+  brd1S=true;
+  brd2S=true;
+          relayboard_2.State=brd2S;
+      relayboard_2.id=2;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+        
+        Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}
+else if(brd1Mode == "Timer"){
+if(dk > brd1m2sondk || dk < m1basdk) {
+  brd1S=false;
+  brd2S=false;
+           relayboard_2.State=brd2S;
+      relayboard_2.id=2;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+        
+        Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}}
+
+
+
+
+
+
+
+
+
+
+
+
           last = millis();
     }
- /*
-  JSONtxt2 = "{\"board2\":\""+board2volt+"\"}";
-  webSocket.broadcastTXT(JSONtxt2); 
 
-  JSONtxt3 = "{\"board3\":\""+board3volt+"\"}";
-  webSocket.broadcastTXT(JSONtxt3);   
-  */
-   /*
-  Serial.print("board 1 :");
-  Serial.print(board1_volt);
-  Serial.print("\t");
-  Serial.print("board 2 :");
-  Serial.print(board2_volt);
-  Serial.print("\t");
-  Serial.print("board 3 :");
-  Serial.print(board3_volt);
-  Serial.println();
-
-  */
    
 
 

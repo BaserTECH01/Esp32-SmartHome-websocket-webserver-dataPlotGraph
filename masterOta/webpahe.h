@@ -25,7 +25,7 @@ R"=====(
     }
     th, td{
         text-align: center;
-        font-size: 300%
+        font-size: 150%
     }
     th{
         style="width:60%"
@@ -38,7 +38,7 @@ R"=====(
 
     .button {
       padding: 15px 25px;
-      font-size: 24px;
+      font-size: 20px;
       text-align: center;
       cursor: pointer;
       outline: none;
@@ -67,21 +67,20 @@ R"=====(
 <!--------------------------HTML-------------------------->
 <body>
     <h1><div class="h1">ESP32 WebSocket Server</div></h1>
+    <div>
  <center>
  <a href="http://192.168.1.43/serverIndex" target="_blank" rel="noopener noreferrer">
  <button class="button" style="background-color:rgb(3, 30, 223)" >Update for firmware of master</button>
- 
  </a>
-  <a href="http://192.168.1.44:90/serverIndex" target="_blank" rel="noopener noreferrer">
- <button class="button" style="background-color:rgb(3, 115, 3)" >Update for firmware of Slave </button>
-
- </a>
+ <p></p>
+<br>
+</div>
  <div >
  <a style=rgba(128,128,128,0.322) ></a>
  </div>
  </center>
     <table style="width:100%" >
-  <tr style="height:150px">
+  <tr style="height:50px">
     <th>Boards</th>
     <th>Watts</th> 
     <th>Currents</th>
@@ -89,15 +88,27 @@ R"=====(
     <th>Mode</th>
     <th>1.State</th>
     <th>2.State</th>
+    <th>3.State</th>
   </tr>
   
   <tr style="height:100px">
     <td><p>board1</p><p style="color:red;" id="brd1connectStatus" >Connection</p></td>
     <td><span style="color:rgb(216, 3, 3)" id="board1V">0</span> W </td>
     <td><span style="color:rgb(15, 56, 245)" id="board1C">0</span> A</td>
-    <th><p id="mdds1"></p><button class="button"  id="btn"  onclick="button()" > </button></td>
+    <th><button class="button"  id="btn"  onclick="button()" > </button></td>
     <th><button class="button"  id="Mbtn1"  onclick="Mod1()" ></button></td>
-    <th><button onclick="sendinput()">send</button> <input type ="number" disabled="true" id="brd1mod1" ></input></td>
+    <th><button onclick="sendinput()">send</button><br>
+        Start Hour <input type ="number" disabled="true" id="brd1BasS1" min="0" max="23" ></input><br>
+        Star Dk    <input type ="number" disabled="true" id="brd1BasD1" min="0" max="59"></input><br>
+        End Hour   <input type ="number" disabled="true" id="brd1SonS1" min="0" max="23"></input><br>
+        End DK     <input type ="number" disabled="true" id="brd1SonD1" min="0" max="59"></input>
+    </td>  
+    <th><button onclick="brd1time2()">send</button><br>
+        Start Hour <input type ="number" disabled="true" id="brd1BasS2" min="0" max="23" ></input><br>
+        Star Dk    <input type ="number" disabled="true" id="brd1BasD2" min="0" max="59"></input><br>
+        End Hour   <input type ="number" disabled="true" id="brd1SonS2" min="0" max="23"></input><br>
+        End DK     <input type ="number" disabled="true" id="brd1SonD2" min="0" max="59"></input>
+    </td>    
   </tr> 
     
   <tr style="height:100px">
@@ -262,19 +273,35 @@ R"=====(
           
           if(JSONobj.brd1M=='Manuel'){
           document.getElementById("btn").disabled = false;
-          document.getElementById("brd1mod1").disabled = true;
-          document.getElementById('mdds1').innerHTML = '';
+          document.getElementById("brd1BasS1").disabled = true;
+          document.getElementById("brd1BasD1").disabled = true;
+          document.getElementById("brd1SonS1").disabled = true;
+          document.getElementById("brd1SonD1").disabled = true;
+
+          document.getElementById("brd1BasS2").disabled = true;
+          document.getElementById("brd1BasD2").disabled = true;
+          document.getElementById("brd1SonS2").disabled = true;
+          document.getElementById("brd1SonD2").disabled = true;    
+                
           document.getElementById('Mbtn1').innerHTML = JSONobj.brd1M;
           document.getElementById('Mbtn1').style.background = 'blue';
           }
           
           if(JSONobj.brd1M=='Timer'){
-            
-            document.getElementById("brd1mod1").disabled = false;
             document.getElementById("btn").disabled = true;
-            document.getElementById('mdds1').innerHTML = 'Disabled';
+            document.getElementById("brd1BasS1").disabled = false;
+            document.getElementById("brd1BasD1").disabled = false;
+            document.getElementById("brd1SonS1").disabled = false;
+            document.getElementById("brd1SonD1").disabled = false;
+
+            document.getElementById("brd1BasS2").disabled = false;
+            document.getElementById("brd1BasD2").disabled = false;
+            document.getElementById("brd1SonS2").disabled = false;
+            document.getElementById("brd1SonD2").disabled = false;
+                        
+            document.getElementById("btn").innerHTML = 'Disabled';
             document.getElementById('Mbtn1').innerHTML = JSONobj.brd1M;
-            document.getElementById('Mbtn1').style.background = 'grey';
+            document.getElementById('Mbtn1').style.background = 'green';
           }
 
 
@@ -334,6 +361,11 @@ R"=====(
           {
             document.getElementById('btn').innerHTML = JSONobj.brd1S;
             document.getElementById('btn').style.background='#d40505';
+          }
+          else if(JSONobj.brd1S == 'disabled')
+          {
+            document.getElementById('btn').innerHTML = JSONobj.brd1S;
+            document.getElementById('btn').style.background='grey';
           }
 
 
@@ -427,12 +459,33 @@ R"=====(
 
     function sendinput()
     {
-       
-       sendinput1 = "inputbrd1="+document.getElementById("brd1mod1").value; 
+       var BasSaatdk = document.getElementById("brd1BasS1").value*60;
+       var basdk = document.getElementById("brd1BasD1").value;
+       var sonSaatdk = document.getElementById("brd1SonS1").value*60;
+       var sondk = document.getElementById("brd1SonD1").value;
+       var basTdk = parseInt(BasSaatdk) + parseInt(basdk) ;
+       var sonTdk = parseInt(sonSaatdk) + parseInt(sondk) ;
+       console.log(basTdk);
+       console.log(sonTdk);
+       sendinput1 = "inputbrd1="+"bas="+basTdk+"Son="+sonTdk;
        console.log(sendinput1);
       websock.send(sendinput1);
     }
-
+    
+    function brd1time2()
+    {
+       var BasSaatdk = document.getElementById("brd1BasS2").value*60;
+       var basdk = document.getElementById("brd1BasD2").value;
+       var sonSaatdk = document.getElementById("brd1SonS2").value*60;
+       var sondk = document.getElementById("brd1SonD2").value;
+       var basTdk = parseInt(BasSaatdk) + parseInt(basdk) ;
+       var sonTdk = parseInt(sonSaatdk) + parseInt(sondk) ;
+       console.log(basTdk);
+       console.log(sonTdk);
+       brd1time2 = "brd1time2="+"bas="+basTdk+"Son="+sonTdk;
+       console.log(brd1time2);
+      websock.send(brd1time2);
+    }
 
 
 </script>
