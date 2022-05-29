@@ -27,8 +27,8 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 //Variables of Board1
 
 String brd1Mode=String("Manuel"); //Board'un Timer mode da mı Manuel Mode damı kullanılacağı bilgisinin kaydedileceği değişken (varsayılan manuel) 
-int m1basdk;
-int m1sondk; 
+int brd1m1basdk;
+int brd1m1sondk; 
 int brd1m2basdk;
 int brd1m2sondk;
 boolean brd1S=false;              //Board da bulunan rölenin durumu bilgisinin kaydedileceği değişken
@@ -38,27 +38,41 @@ uint32_t lastmessage1;            //Boarddan gelen en son mesajın zamanının k
 String brd1ConnectStatus = String("No Connection"); // Board'un bağlantı durumu bilgisinin kaydedileceği değişken
 String JSONboard1;                // Board 1 ile ilgili bilgilerin JSON formatında kaydedileceği değişken (Bu değişken Websocket ile yayınlanacak)
 
-String JSONtxt;
+
+//Variables of Board2
+
+String brd2Mode=String("Manuel");
+int brd2m1basdk;
+int brd2m1sondk; 
+int brd2m2basdk;
+int brd2m2sondk;
+boolean brd2S=false;
+int board2_volt=0;
+float board2_Current=0;
+uint32_t lastmessage2;
+String brd2ConnectStatus = String("No Connection");
+String JSONboard2;
+
+
 
 uint32_t last;
 
-uint32_t lastmessage2;
-
-String brd2Mode=String("Manuel");
 
 
-int board2_volt=0;
+
+
+
 int board3_volt=0;
 
 
-float board2_Current=0;
+
 float board3_Current=0;
 
 
-boolean brd2S=false;
+
 boolean brd3S=false;
 
-String brd2ConnectStatus = String("No Connection");
+
 String brd3ConnectStatus = String("No Connection");
 
 int LED =4;
@@ -152,10 +166,10 @@ Serial.println(payloadString);
     String val2 = payloadString.substring(separator2+1,separator3-3);
     String val3 = payloadString.substring(separator3+1);
 
-    if(var == "inputbrd1")
+    if(var == "brd1time1")
     {
-     m1basdk= val2.toInt();
-     m1sondk= val3.toInt();
+     brd1m1basdk= val2.toInt();
+     brd1m1sondk= val3.toInt();
     }
     
     if(var == "brd1time2")
@@ -174,6 +188,15 @@ Serial.println(payloadString);
       }
     }
 
+    if(var == "Mode2")
+    {
+      if(val == "Manuel"){
+        brd2Mode = String("Manuel");
+      }
+      if(val == "Timer" ){
+        brd2Mode = String("Timer");
+      }
+    }
     if(var == "brd1S")
     {
       brd1S = false;
@@ -448,8 +471,7 @@ String strtbrd1ConnectStatus = String(brd1ConnectStatus);
   //-----------------------------------------------
   
   String BRD1status = "OFF";
-  if(brd1S == true && brd1Mode == "Manuel") BRD1status = "ON";
-  if(brd1Mode == "Timer")BRD1status = "disabled";
+  if(brd1S == true ) BRD1status = "ON";
 
       //2. led-----------------------------------------------
   if(brd2S == false) digitalWrite(LED2, LOW);
@@ -478,9 +500,9 @@ String strtbrd1ConnectStatus = String(brd1ConnectStatus);
 Serial.println(brd2ConnectStatus);
 Serial.println(dk);
 Serial.print("bas1:");
-Serial.println(m1basdk);
+Serial.println(brd1m1basdk);
 Serial.print("son1:");
-Serial.println(m1sondk);
+Serial.println(brd1m1sondk);
 Serial.print("bas2:");
 Serial.println(brd1m2basdk);
 Serial.print("son2:");
@@ -494,12 +516,17 @@ Serial.println(brd1m2sondk);
 
                 
   webSocket.broadcastTXT(JSONboard1);
-  
-  
-  JSONtxt =  "{\"brd2V\":\""+board2volt+"\",\"brd2C\":\""+board2Current+"\",\"brd2S\":\""+BRD2status+"\",\"brd2ConnectSt\":\""+brd2ConnectStatus+"\",";
-  JSONtxt +=  "\"brd3V\":\""+board3volt+"\",\"brd3C\":\""+board3Current+"\",\"brd3S\":\""+BRD3status+"\"}";
-  
-  webSocket.broadcastTXT(JSONtxt);
+
+
+  JSONboard2  = "{\"brd2M\":\""+brd2Mode+"\",";
+  JSONboard2 +=  "\"brd2V\":\""+board2volt+"\",";
+  JSONboard2 +=  "\"brd2C\":\""+board2Current+"\",";
+  JSONboard2 +=  "\"brd2S\":\""+BRD2status+"\",";
+  JSONboard2 +=  "\"brd2ConnectSt\":\""+brd2ConnectStatus+"\"    }";
+
+                
+  webSocket.broadcastTXT(JSONboard2);  
+
 
 
 ///////////////////////////////////////////////////
@@ -507,13 +534,11 @@ Serial.println(brd1m2sondk);
 //TIME
 /////////////////////////////////////////////////
 
-if (m1basdk <= dk && m1sondk >= dk && brd1Mode == "Timer"){
+if (brd1m1basdk <= dk && brd1m1sondk >= dk && brd1Mode == "Timer"){
   brd1S=true;
-  brd2S=true;
-
-        relayboard_2.State=brd2S;
-      relayboard_2.id=2;
-      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+      relayboard_1.State=brd1S;
+      relayboard_1.id=1;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard_1, sizeof(relayboard_1));
         
         Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
     if (result == ESP_OK) {
@@ -525,10 +550,9 @@ if (m1basdk <= dk && m1sondk >= dk && brd1Mode == "Timer"){
 }
 else if (brd1m2basdk <= dk && brd1m2sondk >= dk && brd1Mode == "Timer"){
   brd1S=true;
-  brd2S=true;
-          relayboard_2.State=brd2S;
-      relayboard_2.id=2;
-      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+      relayboard_1.State=brd1S;
+      relayboard_1.id=1;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard_1, sizeof(relayboard_1));
         
         Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
     if (result == ESP_OK) {
@@ -539,12 +563,26 @@ else if (brd1m2basdk <= dk && brd1m2sondk >= dk && brd1Mode == "Timer"){
          }
 }
 else if(brd1Mode == "Timer"){
-if(dk > brd1m2sondk || dk < m1basdk) {
+if(dk > brd1m2sondk || dk < brd1m1basdk) {
   brd1S=false;
-  brd2S=false;
-           relayboard_2.State=brd2S;
-      relayboard_2.id=2;
-      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+      relayboard_1.State=brd1S;
+      relayboard_1.id=1;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard_1, sizeof(relayboard_1));
+        
+        Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}
+
+if(dk < brd1m2sondk || dk > brd1m1basdk) {
+  brd1S=false;
+      relayboard_1.State=brd1S;
+      relayboard_1.id=1;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard_1, sizeof(relayboard_1));
         
         Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
     if (result == ESP_OK) {

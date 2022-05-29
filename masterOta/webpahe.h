@@ -57,8 +57,31 @@ R"=====(
      transform: translateY(4px);
     }
 
+    .buttonMinik {
+      padding: 9px 9px;
+      font-size: 12px;
+      text-align: center;
+      cursor: pointer;
+      outline: none;
+      color: #fff;
+      background-color: #04AA6D;
+      border: none;
+      border-radius: 7px;
+      box-shadow: 0 4px #999;
+    }
 
+    .buttonMinik:hover {background-color: #3e8e41}
 
+    .buttonMinik:active {
+     background-color: #3e8e41;
+     box-shadow: 0 3px #666;
+     transform: translateY(3px);
+    }
+
+    input {
+     width:40%;
+     height:10%;
+   }
 
 
     
@@ -86,9 +109,8 @@ R"=====(
     <th>Currents</th>
     <th>State</th>
     <th>Mode</th>
-    <th>1.State</th>
-    <th>2.State</th>
-    <th>3.State</th>
+    <th>Timer</th>
+
   </tr>
   
   <tr style="height:100px">
@@ -97,25 +119,41 @@ R"=====(
     <td><span style="color:rgb(15, 56, 245)" id="board1C">0</span> A</td>
     <th><button class="button"  id="btn"  onclick="button()" > </button></td>
     <th><button class="button"  id="Mbtn1"  onclick="Mod1()" ></button></td>
-    <th><button onclick="sendinput()">send</button><br>
-        Start Hour <input type ="number" disabled="true" id="brd1BasS1" min="0" max="23" ></input><br>
-        Star Dk    <input type ="number" disabled="true" id="brd1BasD1" min="0" max="59"></input><br>
-        End Hour   <input type ="number" disabled="true" id="brd1SonS1" min="0" max="23"></input><br>
-        End DK     <input type ="number" disabled="true" id="brd1SonD1" min="0" max="59"></input>
+    <th>     <select disabled="true" id="brd1timerNo" required>
+               <option value="" selected disabled>Timer interval no</option>
+               <option value="1">1</option>
+               <option value="2">2</option>
+               <option value="3">3</option>
+             </select>
+             <br>
+         <input type ="number" disabled="true" id="brd1BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+         <input type ="number" disabled="true" id="brd1BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+         <input type ="number" disabled="true" id="brd1SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+         <input type ="number" disabled="true" id="brd1SonD1" min="0" max="59" placeholder="End Min"></input><br>
+        <button class="buttonMinik" onclick="sendinput()">send</button><br><br>
+        
     </td>  
-    <th><button onclick="brd1time2()">send</button><br>
-        Start Hour <input type ="number" disabled="true" id="brd1BasS2" min="0" max="23" ></input><br>
-        Star Dk    <input type ="number" disabled="true" id="brd1BasD2" min="0" max="59"></input><br>
-        End Hour   <input type ="number" disabled="true" id="brd1SonS2" min="0" max="23"></input><br>
-        End DK     <input type ="number" disabled="true" id="brd1SonD2" min="0" max="59"></input>
-    </td>    
   </tr> 
-    
+  
   <tr style="height:100px">
     <td><p>board2</p><p style="color:red;" id="brd2connectStatus" >Connection</p></td>
     <td><span style="color:rgb(216, 3, 3)" id="board2V">0</span> W </td>
     <td><span style="color:rgb(15, 56, 245)" id="board2C">0</span> A</td>
     <th><button class="button"  id="btn2"  onclick="button2()" > </button></td>
+    <th><button class="button"  id="Mbtn2"  onclick="Mod2()" ></button></td>
+    <th>     <select disabled="true" id="brd2timerNo" required>
+               <option value="" selected disabled>Timer interval no</option>
+               <option value="1">1</option>
+               <option value="2">2</option>
+               <option value="3">3</option>
+             </select>
+             <br>    
+        <input type ="number" disabled="true" id="brd2BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+        <input type ="number" disabled="true" id="brd2BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+        <input type ="number" disabled="true" id="brd2SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+        <input type ="number" disabled="true" id="brd2SonD1" min="0" max="59" placeholder="End Min"></input><br>
+        <button class="buttonMinik" onclick="brd2time()">send</button><br><br>
+    </td>  
   </tr>
   
   <tr style="height:100px">
@@ -266,22 +304,31 @@ R"=====(
       JSONobj = JSON.parse(evt.data);
       
         if(JSONobj.brd1V){
+          
+          //1. BUTON
+          if(JSONobj.brd1S == 'ON')
+          {
+            document.getElementById('btn').innerHTML = JSONobj.brd1S;
+            document.getElementById('btn').style.background = '#3e8e41';
+          }
+          else if(JSONobj.brd1S == 'OFF')
+          {
+            document.getElementById('btn').innerHTML = JSONobj.brd1S;
+            document.getElementById('btn').style.background='#d40505';
+          }
 
-
+          
+          
           document.getElementById('board1V').innerHTML = JSONobj.brd1V;
           document.getElementById('board1C').innerHTML = JSONobj.brd1C;
           
           if(JSONobj.brd1M=='Manuel'){
           document.getElementById("btn").disabled = false;
+          document.getElementById("brd1timerNo").disabled = true;
           document.getElementById("brd1BasS1").disabled = true;
           document.getElementById("brd1BasD1").disabled = true;
           document.getElementById("brd1SonS1").disabled = true;
           document.getElementById("brd1SonD1").disabled = true;
-
-          document.getElementById("brd1BasS2").disabled = true;
-          document.getElementById("brd1BasD2").disabled = true;
-          document.getElementById("brd1SonS2").disabled = true;
-          document.getElementById("brd1SonD2").disabled = true;    
                 
           document.getElementById('Mbtn1').innerHTML = JSONobj.brd1M;
           document.getElementById('Mbtn1').style.background = 'blue';
@@ -289,17 +336,12 @@ R"=====(
           
           if(JSONobj.brd1M=='Timer'){
             document.getElementById("btn").disabled = true;
+            document.getElementById("brd1timerNo").disabled = false;
             document.getElementById("brd1BasS1").disabled = false;
             document.getElementById("brd1BasD1").disabled = false;
             document.getElementById("brd1SonS1").disabled = false;
             document.getElementById("brd1SonD1").disabled = false;
-
-            document.getElementById("brd1BasS2").disabled = false;
-            document.getElementById("brd1BasD2").disabled = false;
-            document.getElementById("brd1SonS2").disabled = false;
-            document.getElementById("brd1SonD2").disabled = false;
                         
-            document.getElementById("btn").innerHTML = 'Disabled';
             document.getElementById('Mbtn1').innerHTML = JSONobj.brd1M;
             document.getElementById('Mbtn1').style.background = 'green';
           }
@@ -324,8 +366,46 @@ R"=====(
           if(JSONobj.brd2V)
           {
 
+            
+            //2. BUTON
+            if(JSONobj.brd2S == 'ON')
+            {
+              document.getElementById('btn2').innerHTML = JSONobj.brd2S;
+              document.getElementById('btn2').style.background = '#3e8e41';
+             }
+             else if(JSONobj.brd2S == 'OFF')
+             {
+              document.getElementById('btn2').innerHTML = JSONobj.brd2S;
+              document.getElementById('btn2').style.background='#d40505';
+             }
+
+          
            document.getElementById('board2V').innerHTML = JSONobj.brd2V;
            document.getElementById('board2C').innerHTML = JSONobj.brd2C;
+
+           if(JSONobj.brd2M=='Manuel'){
+          document.getElementById("btn2").disabled = false;
+          document.getElementById("brd2timerNo").disabled = true;
+          document.getElementById("brd2BasS1").disabled = true;
+          document.getElementById("brd2BasD1").disabled = true;
+          document.getElementById("brd2SonS1").disabled = true;
+          document.getElementById("brd2SonD1").disabled = true;
+                
+          document.getElementById('Mbtn2').innerHTML = JSONobj.brd2M;
+          document.getElementById('Mbtn2').style.background = 'blue';            
+           }
+
+          if(JSONobj.brd2M=='Timer'){
+            document.getElementById("btn2").disabled = true;
+            document.getElementById("brd2timerNo").disabled = false;
+            document.getElementById("brd2BasS1").disabled = false;
+            document.getElementById("brd2BasD1").disabled = false;
+            document.getElementById("brd2SonS1").disabled = false;
+            document.getElementById("brd2SonD1").disabled = false;
+                        
+            document.getElementById('Mbtn2').innerHTML = JSONobj.brd2M;
+            document.getElementById('Mbtn2').style.background = 'green';
+          }
            
            if(JSONobj.brd2ConnectSt == 'Connected')
           {
@@ -351,35 +431,11 @@ R"=====(
            document.getElementById('board3C').innerHTML = JSONobj.brd3C;
        }
           
-          //1. BUTON
-          if(JSONobj.brd1S == 'ON')
-          {
-            document.getElementById('btn').innerHTML = JSONobj.brd1S;
-            document.getElementById('btn').style.background = '#3e8e41';
-          }
-          else if(JSONobj.brd1S == 'OFF')
-          {
-            document.getElementById('btn').innerHTML = JSONobj.brd1S;
-            document.getElementById('btn').style.background='#d40505';
-          }
-          else if(JSONobj.brd1S == 'disabled')
-          {
-            document.getElementById('btn').innerHTML = JSONobj.brd1S;
-            document.getElementById('btn').style.background='grey';
-          }
 
 
-          //2. BUTON
-          if(JSONobj.brd2S == 'ON')
-          {
-            document.getElementById('btn2').innerHTML = JSONobj.brd2S;
-            document.getElementById('btn2').style.background = '#3e8e41';
-          }
-          else if(JSONobj.brd2S == 'OFF')
-          {
-            document.getElementById('btn2').innerHTML = JSONobj.brd2S;
-            document.getElementById('btn2').style.background='#d40505';
-          }
+
+
+
 
 
           //3. BUTON
@@ -457,6 +513,19 @@ R"=====(
            
     }
 
+    function Mod2()
+    {
+      if(document.getElementById("Mbtn2").innerHTML == 'Timer')
+        {
+          Mbtn2 = "Mode2=Manuel";
+        }
+        else if(document.getElementById("Mbtn2").innerHTML == 'Manuel')
+        {
+          Mbtn2 = "Mode2=Timer";
+        }
+        websock.send(Mbtn2);
+           
+    }
     function sendinput()
     {
        var BasSaatdk = document.getElementById("brd1BasS1").value*60;
@@ -467,25 +536,33 @@ R"=====(
        var sonTdk = parseInt(sonSaatdk) + parseInt(sondk) ;
        console.log(basTdk);
        console.log(sonTdk);
-       sendinput1 = "inputbrd1="+"bas="+basTdk+"Son="+sonTdk;
-       console.log(sendinput1);
-      websock.send(sendinput1);
+       if ( document.getElementById("brd1timerNo").value ==1){
+        brd1time1 = "brd1time1="+"bas="+basTdk+"Son="+sonTdk;
+        websock.send(brd1time1);
+       }
+       if ( document.getElementById("brd1timerNo").value ==2){
+        brd1time2 = "brd1time2="+"bas="+basTdk+"Son="+sonTdk;
+        websock.send(brd1time2);
+       }       
+
     }
     
-    function brd1time2()
+
+    function brd2time1()
     {
-       var BasSaatdk = document.getElementById("brd1BasS2").value*60;
-       var basdk = document.getElementById("brd1BasD2").value;
-       var sonSaatdk = document.getElementById("brd1SonS2").value*60;
-       var sondk = document.getElementById("brd1SonD2").value;
+       var BasSaatdk = document.getElementById("brd2BasS1").value*60;
+       var basdk = document.getElementById("brd2BasD1").value;
+       var sonSaatdk = document.getElementById("brd2SonS1").value*60;
+       var sondk = document.getElementById("brd2SonD1").value;
        var basTdk = parseInt(BasSaatdk) + parseInt(basdk) ;
        var sonTdk = parseInt(sonSaatdk) + parseInt(sondk) ;
        console.log(basTdk);
        console.log(sonTdk);
-       brd1time2 = "brd1time2="+"bas="+basTdk+"Son="+sonTdk;
-       console.log(brd1time2);
-      websock.send(brd1time2);
+       brd2time1 = "brd2time1="+"bas="+basTdk+"Son="+sonTdk;
+       console.log(brd2time1);
+      websock.send(brd2time1);
     }
+
 
 
 </script>
