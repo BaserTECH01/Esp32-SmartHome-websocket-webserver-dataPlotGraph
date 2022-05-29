@@ -55,25 +55,26 @@ String JSONboard2;
 
 
 
+//Variables of Board3
+
+String brd3Mode=String("Manuel");
+int brd3m1basdk;
+int brd3m1sondk; 
+int brd3m2basdk;
+int brd3m2sondk;
+boolean brd3S=false;
+int board3_volt=0;
+float board3_Current=0;
+uint32_t lastmessage3;
+String brd3ConnectStatus = String("No Connection");
+String JSONboard3;
+
+
 uint32_t last;
 
 
 
 
-
-
-int board3_volt=0;
-
-
-
-float board3_Current=0;
-
-
-
-boolean brd3S=false;
-
-
-String brd3ConnectStatus = String("No Connection");
 
 int LED =4;
 int LED2 =5;
