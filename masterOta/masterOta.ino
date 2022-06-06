@@ -108,13 +108,11 @@ constexpr char WIFI_PASS[] = "tgzUCAdkAt";
 String success;
 esp_now_peer_info_t peerInfo;
 esp_now_peer_info_t peerInfo_2;
+esp_now_peer_info_t peerInfo_3;
 
 constexpr uint8_t ESP_NOW_RECEIVER[] = { 0x30, 0xAE, 0xA4, 0x00, 0x40, 0xBC };
-constexpr uint8_t ESP_NOW_RECEIVER_2[] = { 0x30, 0xAE, 0xA4, 0x00, 0x3B, 0x08 };
-uint8_t BRD2MAC[] = {0x7C, 0x9E, 0xBD, 0x37, 0x28, 0x4C};
-uint8_t BRD3MAC[] = {0x7C, 0x9E, 0xBD, 0x37, 0x28, 0x4C};
-uint8_t BRD4MAC[] = {0x7C, 0x9E, 0xBD, 0x37, 0x28, 0x4C};
-
+constexpr uint8_t ESP_NOW_RECEIVER_2[] = { 0x30, 0xAE, 0xA4, 0x00, 0x3B, 0x03 };
+constexpr uint8_t ESP_NOW_RECEIVER_3[] = { 0x30, 0xAE, 0xA4, 0x00, 0x3B, 0x08 };
 
 //Structure example to send data
 //Must match the receiver structure
@@ -141,13 +139,12 @@ led_message relayboard_2;
 led_message relayboard_3;
 
 
-
-
 struct_message board1;
 struct_message board2;
 struct_message board3;
 
 struct_message boardsStruct[3] = {board1, board2, board3};
+
 
 
 
@@ -178,6 +175,34 @@ Serial.println(payloadString);
      brd1m2basdk= val2.toInt();
      brd1m2sondk= val3.toInt();
     }
+
+
+    if(var == "brd2time1")
+    {
+     brd2m1basdk= val2.toInt();
+     brd2m1sondk= val3.toInt();
+    }
+    
+    if(var == "brd2time2")
+    {
+     brd2m2basdk= val2.toInt();
+     brd2m2sondk= val3.toInt();
+    } 
+       
+    if(var == "brd3time1")
+    {
+     brd3m1basdk= val2.toInt();
+     brd3m1sondk= val3.toInt();
+    }
+    
+    if(var == "brd3time2")
+    {
+     brd3m2basdk= val2.toInt();
+     brd3m2sondk= val3.toInt();
+    }    
+
+
+    
     
     if(var == "Mode1")
     {
@@ -198,6 +223,17 @@ Serial.println(payloadString);
         brd2Mode = String("Timer");
       }
     }
+    
+    if(var == "Mode3")
+    {
+      if(val == "Manuel"){
+        brd3Mode = String("Manuel");
+      }
+      if(val == "Timer" ){
+        brd3Mode = String("Timer");
+      }
+    }
+        
     if(var == "brd1S")
     {
       brd1S = false;
@@ -206,7 +242,7 @@ Serial.println(payloadString);
       relayboard_1.id=1;
       esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard_1, sizeof(relayboard_1));
         
-        Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
+      //  Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
     if (result == ESP_OK) {
       Serial.println("Sent with success");
       }
@@ -238,6 +274,17 @@ Serial.println(payloadString);
     {
       brd3S = false;
       if(val == "ON") brd3S = true;
+      relayboard_3.State=brd3S;
+      relayboard_3.id=3;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_3, (uint8_t *) &relayboard_3, sizeof(relayboard_3));
+        
+        Serial.printf("sent: %3u on channel: %u\n", board3, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }      
     }
 
 
@@ -315,7 +362,6 @@ void onReceive(const uint8_t *mac_addr, const uint8_t *data, int len) {
     );
 
 memcpy(&myData, data, sizeof(myData));
-boardsStruct[myData.id-1].Volt = myData.Volt;
 
 if(myData.id==1){
     brd1ConnectStatus=String("Connected");
@@ -331,6 +377,8 @@ if(myData.id==1){
     board2_Current=myData.Current;
   }
    else if(myData.id==3){
+    lastmessage3=millis();
+    brd3ConnectStatus=String("Connected");
     board3_volt=myData.Volt;
     board3_Current=myData.Current;
   }
@@ -372,6 +420,11 @@ void initEspNow() {
     if (esp_now_add_peer(&peerInfo_2) != ESP_OK) {
         Serial.println("ESP NOW 2 pairing failure");
         while (1); }
+
+    memcpy(peerInfo_3.peer_addr, ESP_NOW_RECEIVER_3, 6);
+    if (esp_now_add_peer(&peerInfo_3) != ESP_OK) {
+        Serial.println("ESP NOW 3 pairing failure");
+        while (1); }        
        
 /*
     memcpy(peerInfo.peer_addr, BRD2MAC, 6);
@@ -463,7 +516,10 @@ String board1Current = String(board1_Current);
 String board2Current = String(board2_Current);
 String board3Current = String(board3_Current);
 
-String strtbrd1ConnectStatus = String(brd1ConnectStatus);
+
+
+//String strtbrd3ConnectStatus = String(brd3ConnectStatus);
+//String strtbrd1ConnectStatus = String(brd1ConnectStatus);
 
 
     //1. board-----------------------------------------------
@@ -494,20 +550,25 @@ String strtbrd1ConnectStatus = String(brd1ConnectStatus);
     brd2ConnectStatus=String("No Connection");
   }
 
+  
+  if (millis() - lastmessage3 > 5000) {
+    brd3ConnectStatus=String("No Connection");
+  }
+  
     if (millis() - lastmessage1 > 5000) {
     brd1ConnectStatus=String("No Connection");
   }
     if (millis() - last > 1000) {
-Serial.println(brd2ConnectStatus);
+Serial.println(brd3ConnectStatus);
 Serial.println(dk);
 Serial.print("bas1:");
-Serial.println(brd1m1basdk);
+Serial.println(brd3m1basdk);
 Serial.print("son1:");
-Serial.println(brd1m1sondk);
+Serial.println(brd3m1sondk);
 Serial.print("bas2:");
-Serial.println(brd1m2basdk);
+Serial.println(brd3m2basdk);
 Serial.print("son2:");
-Serial.println(brd1m2sondk);
+Serial.println(brd3m2sondk);
 
   JSONboard1  = "{\"brd1M\":\""+brd1Mode+"\",";
   JSONboard1 +=  "\"brd1V\":\""+board1volt+"\",";
@@ -529,10 +590,18 @@ Serial.println(brd1m2sondk);
   webSocket.broadcastTXT(JSONboard2);  
 
 
+  JSONboard3  = "{\"brd3M\":\""+brd3Mode+"\",";
+  JSONboard3 +=  "\"brd3V\":\""+board3volt+"\",";
+  JSONboard3 +=  "\"brd3C\":\""+board3Current+"\",";
+  JSONboard3 +=  "\"brd3S\":\""+BRD3status+"\",";
+  JSONboard3 +=  "\"brd3ConnectSt\":\""+brd3ConnectStatus+"\"    }";
+
+                
+  webSocket.broadcastTXT(JSONboard3);  
 
 ///////////////////////////////////////////////////
 ////////////////////////////////////////////////
-//TIME
+//TIME For Board1 
 /////////////////////////////////////////////////
 
 if (brd1m1basdk <= dk && brd1m1sondk >= dk && brd1Mode == "Timer"){
@@ -541,7 +610,7 @@ if (brd1m1basdk <= dk && brd1m1sondk >= dk && brd1Mode == "Timer"){
       relayboard_1.id=1;
       esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard_1, sizeof(relayboard_1));
         
-        Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
+        //Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
     if (result == ESP_OK) {
       Serial.println("Sent with success");
       }
@@ -555,7 +624,7 @@ else if (brd1m2basdk <= dk && brd1m2sondk >= dk && brd1Mode == "Timer"){
       relayboard_1.id=1;
       esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard_1, sizeof(relayboard_1));
         
-        Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
+        //Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
     if (result == ESP_OK) {
       Serial.println("Sent with success");
       }
@@ -570,7 +639,7 @@ if(dk > brd1m2sondk || dk < brd1m1basdk) {
       relayboard_1.id=1;
       esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard_1, sizeof(relayboard_1));
         
-        Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
+       // Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
     if (result == ESP_OK) {
       Serial.println("Sent with success");
       }
@@ -585,7 +654,7 @@ if(dk < brd1m2sondk || dk > brd1m1basdk) {
       relayboard_1.id=1;
       esp_err_t result = esp_now_send(ESP_NOW_RECEIVER, (uint8_t *) &relayboard_1, sizeof(relayboard_1));
         
-        Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
+       // Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
     if (result == ESP_OK) {
       Serial.println("Sent with success");
       }
@@ -595,11 +664,147 @@ if(dk < brd1m2sondk || dk > brd1m1basdk) {
 }}
 
 
+///////////////////////////////////////////////////
+////////////////////////////////////////////////
+//END OF TIME For Board1 
+/////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////
+////////////////////////////////////////////////
+//TIME For Board  2  
+/////////////////////////////////////////////////
+
+if (brd2m1basdk <= dk && brd2m1sondk >= dk && brd2Mode == "Timer"){
+  brd2S=true;
+      relayboard_2.State=brd2S;
+      relayboard_2.id=2;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+        
+        //Serial.printf("sent: %3u on channel: %u\n", board2, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}
+else if (brd2m2basdk <= dk && brd2m2sondk >= dk && brd2Mode == "Timer"){
+  brd2S=true;
+      relayboard_2.State=brd2S;
+      relayboard_2.id=2;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+        
+        //Serial.printf("sent: %3u on channel: %u\n", board2, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}
+else if(brd2Mode == "Timer"){
+if(dk > brd2m2sondk || dk < brd2m1basdk) {
+  brd2S=false;
+      relayboard_2.State=brd2S;
+      relayboard_2.id=2;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+        
+       // Serial.printf("sent: %3u on channel: %u\n", board2, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}
+
+if(dk < brd2m2sondk || dk > brd2m1basdk) {
+  brd2S=false;
+      relayboard_2.State=brd2S;
+      relayboard_2.id=2;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_2, (uint8_t *) &relayboard_2, sizeof(relayboard_2));
+        
+       // Serial.printf("sent: %3u on channel: %u\n", board1, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}}
+
+///////////////////////////////////////////////////
+////////////////////////////////////////////////
+//END OF TIME For Board  2
+/////////////////////////////////////////////////
 
 
 
+///////////////////////////////////////////////////
+////////////////////////////////////////////////
+//END OF TIME For Board  3
+/////////////////////////////////////////////////
 
 
+if (brd3m1basdk <= dk && brd3m1sondk >= dk && brd3Mode == "Timer"){
+  brd3S=true;
+      relayboard_3.State=brd3S;
+      relayboard_3.id=3;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_3, (uint8_t *) &relayboard_3, sizeof(relayboard_3));
+        
+        //Serial.printf("sent: %3u on channel: %u\n", board3, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}
+else if (brd3m2basdk <= dk && brd3m2sondk >= dk && brd3Mode == "Timer"){
+  brd3S=true;
+      relayboard_3.State=brd3S;
+      relayboard_3.id=3;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_3, (uint8_t *) &relayboard_3, sizeof(relayboard_3));
+        
+        //Serial.printf("sent: %3u on channel: %u\n", board3, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}
+else if(brd3Mode == "Timer"){
+if(dk > brd3m2sondk || dk < brd3m1basdk) {
+  brd3S=false;
+      relayboard_3.State=brd3S;
+      relayboard_3.id=3;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_3, (uint8_t *) &relayboard_3, sizeof(relayboard_3));
+        
+       // Serial.printf("sent: %3u on channel: %u\n", board3, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}
+
+if(dk < brd3m2sondk || dk > brd3m1basdk) {
+  brd3S=false;
+      relayboard_3.State=brd3S;
+      relayboard_3.id=3;
+      esp_err_t result = esp_now_send(ESP_NOW_RECEIVER_3, (uint8_t *) &relayboard_3, sizeof(relayboard_3));
+        
+       // Serial.printf("sent: %3u on channel: %u\n", board3, WiFi.channel());
+    if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      }
+    else {
+      Serial.println("Error sending the data");
+         }
+}}
 
 
 
