@@ -42,6 +42,8 @@ String success;
 boolean RelayState;
 int relaypin =26;
 int relayledpin=19;
+int peerpin=18;
+int peerstate=0;
 typedef struct struct_message {
     int id;
     int Volt;
@@ -62,7 +64,7 @@ typedef struct led_message {
     
 
 } led_message;
-// Create a struct_message called BME280Readings to hold sensor readings
+
 
 led_message relayboard_1; //Her board için değişltirlecek
 
@@ -90,9 +92,15 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
   if (status ==0){
     success = "Delivery Success :)";
+    digitalWrite(5,0);
+    digitalWrite(peerpin,1);
   }
   else{
+    digitalWrite(5,1);
     success = "Delivery Fail :(";
+    digitalWrite(5,1);
+    digitalWrite(peerpin,0);
+    
   }
 }
 
@@ -166,6 +174,7 @@ void setup() {
       pinMode(ACS_Pin,INPUT); 
     pinMode(relaypin,OUTPUT);
     pinMode(relayledpin,OUTPUT);
+    pinMode(5,OUTPUT);
     EEPROM.begin(EEPROM_SIZE);
     RelayState = EEPROM.read(0);
     digitalWrite(relaypin, RelayState);
@@ -176,7 +185,7 @@ void setup() {
     initEspNow();
     delay(500);
     myData.id=1; // her board için değiştirilecek
-    
+    digitalWrite(5,1);
    
 }
 

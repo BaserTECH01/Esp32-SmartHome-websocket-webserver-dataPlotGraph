@@ -735,8 +735,8 @@ void initWiFi() {
      if (!WiFi.config(local_IP,gateway,subnet)) {
     Serial.println("Statik ip ve gateway adres ayarlama başarısız oldu.");
     }
-
 */
+
 
 //Wifi bağlantısını başlatıyoruz.    
     WiFi.begin(WIFI_SSID, WIFI_PASS);

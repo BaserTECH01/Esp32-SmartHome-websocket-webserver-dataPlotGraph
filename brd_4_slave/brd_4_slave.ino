@@ -52,7 +52,7 @@ typedef struct struct_message {
 
 } struct_message;
 
-// Create a struct_message called BME280Readings to hold sensor readings
+
 struct_message myData;
 struct_message board4;
 // Create a struct_message to hold incoming sensor readings

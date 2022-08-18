@@ -1,0 +1,16 @@
+2019-07-30 15:10:03 Info: No valid data fetched!
+2019-07-30 15:10:05 Warning: Start Pcap Driver => Start service failed!
+2019-07-30 15:10:05 Info: Load  "kcsphmod.dll"
+2019-07-30 15:10:05 Info: Load  "kcspidmod.dll"
+2019-07-30 15:10:05 Info: Load  "kcspimod.dll"
+2019-07-30 15:10:05 Info: Load  "kctcpmod.dll"
+2019-07-30 15:10:05 Info: Update poll interval.
+2019-07-30 15:10:05 Info: Update new device, ID:  "0001" , Communication port:  "COM10"
+2019-07-30 15:57:45 Info: Disable device.  ID:  "0001"
+2019-07-30 19:56:45 Info: No valid data fetched!
+2019-07-30 19:56:46 Warning: Start Pcap Driver => Start service failed!
+2019-07-30 19:56:47 Info: Load  "kcsphmod.dll"
+2019-07-30 19:56:47 Info: Load  "kcspidmod.dll"
+2019-07-30 19:56:47 Info: Load  "kcspimod.dll"
+2019-07-30 19:56:47 Info: Load  "kctcpmod.dll"
+2019-07-30 19:56:47 Info: Update poll interval.

@@ -110,7 +110,7 @@ canvas {
 
     <div>
  <center>
- <a href="http://192.168.1.43/serverIndex" target="_blank" rel="noopener noreferrer">
+ <a href="http://10.60.1.43/serverIndex" target="_blank" rel="noopener noreferrer">
  <button class="button" style="background-color:rgb(3, 30, 223)" >Update for firmware of master</button>
  </a>
  <p></p>
@@ -158,10 +158,10 @@ canvas {
                <option value="3">3</option>
              </select>
              <br>
-         <input type ="number" disabled="true" id="brd1BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
-         <input type ="number" disabled="true" id="brd1BasD1" min="0" max="59" placeholder="Start Min"></input><br>
-         <input type ="number" disabled="true" id="brd1SonS1" min="0" max="23" placeholder="End Hour"></input><br>
-         <input type ="number" disabled="true" id="brd1SonD1" min="0" max="59" placeholder="End Min"></input><br>
+         <input type ="time" disabled="true" id="brd1BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+         <input type ="time" disabled="true" id="brd1BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+         <input type ="time" disabled="true" id="brd1SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+         <input type ="time" disabled="true" id="brd1SonD1" min="0" max="59" placeholder="End Min"></input><br>
         <button class="buttonMinik" onclick="sendinput()">send</button><br><br>
         
     </td>  
@@ -180,10 +180,10 @@ canvas {
                <option value="3">3</option>
              </select>
              <br>    
-        <input type ="number" disabled="true" id="brd2BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
-        <input type ="number" disabled="true" id="brd2BasD1" min="0" max="59" placeholder="Start Min"></input><br>
-        <input type ="number" disabled="true" id="brd2SonS1" min="0" max="23" placeholder="End Hour"></input><br>
-        <input type ="number" disabled="true" id="brd2SonD1" min="0" max="59" placeholder="End Min"></input><br>
+        <input type ="time" disabled="true" id="brd2BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+        <input type ="time" disabled="true" id="brd2BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+        <input type ="time" disabled="true" id="brd2SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+        <input type ="time" disabled="true" id="brd2SonD1" min="0" max="59" placeholder="End Min"></input><br>
         <button class="buttonMinik" onclick="brd2time()">send</button><br><br>
     </td>  
   </tr>
@@ -201,10 +201,10 @@ canvas {
                <option value="3">3</option>
              </select>
              <br>
-         <input type ="number" disabled="true" id="brd3BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
-         <input type ="number" disabled="true" id="brd3BasD1" min="0" max="59" placeholder="Start Min"></input><br>
-         <input type ="number" disabled="true" id="brd3SonS1" min="0" max="23" placeholder="End Hour"></input><br>
-         <input type ="number" disabled="true" id="brd3SonD1" min="0" max="59" placeholder="End Min"></input><br>
+         <input type ="time" disabled="true" id="brd3BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+         <input type ="time" disabled="true" id="brd3BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+         <input type ="time" disabled="true" id="brd3SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+         <input type ="time" disabled="true" id="brd3SonD1" min="0" max="59" placeholder="End Min"></input><br>
         <button class="buttonMinik" onclick="brd3time()">send</button><br><br>
         
     </td>
@@ -223,10 +223,10 @@ canvas {
                <option value="3">3</option>
              </select>
              <br>
-         <input type ="number" disabled="true" id="brd4BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
-         <input type ="number" disabled="true" id="brd4BasD1" min="0" max="59" placeholder="Start Min"></input><br>
-         <input type ="number" disabled="true" id="brd4SonS1" min="0" max="23" placeholder="End Hour"></input><br>
-         <input type ="number" disabled="true" id="brd4SonD1" min="0" max="59" placeholder="End Min"></input><br>
+         <input type ="time" disabled="true" id="brd4BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+         <input type ="time" disabled="true" id="brd4BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+         <input type ="time" disabled="true" id="brd4SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+         <input type ="time" disabled="true" id="brd4SonD1" min="0" max="59" placeholder="End Min"></input><br>
         <button class="buttonMinik" onclick="brd4time()">send</button><br><br>
         
     </td>
@@ -245,10 +245,10 @@ canvas {
                <option value="3">3</option>
              </select>
              <br>
-         <input type ="number" disabled="true" id="brd5BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
-         <input type ="number" disabled="true" id="brd5BasD1" min="0" max="59" placeholder="Start Min"></input><br>
-         <input type ="number" disabled="true" id="brd5SonS1" min="0" max="23" placeholder="End Hour"></input><br>
-         <input type ="number" disabled="true" id="brd5SonD1" min="0" max="59" placeholder="End Min"></input><br>
+         <input type ="time" disabled="true" id="brd5BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+         <input type ="time" disabled="true" id="brd5BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+         <input type ="time" disabled="true" id="brd5SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+         <input type ="time" disabled="true" id="brd5SonD1" min="0" max="59" placeholder="End Min"></input><br>
         <button class="buttonMinik" onclick="brd5time()">send</button><br><br>
         
     </td>
@@ -267,10 +267,10 @@ canvas {
                <option value="3">3</option>
              </select>
              <br>
-         <input type ="number" disabled="true" id="brd6BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
-         <input type ="number" disabled="true" id="brd6BasD1" min="0" max="59" placeholder="Start Min"></input><br>
-         <input type ="number" disabled="true" id="brd6SonS1" min="0" max="23" placeholder="End Hour"></input><br>
-         <input type ="number" disabled="true" id="brd6SonD1" min="0" max="59" placeholder="End Min"></input><br>
+         <input type ="time" disabled="true" id="brd6BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+         <input type ="time" disabled="true" id="brd6BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+         <input type ="time" disabled="true" id="brd6SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+         <input type ="time" disabled="true" id="brd6SonD1" min="0" max="59" placeholder="End Min"></input><br>
         <button class="buttonMinik" onclick="brd6time()">send</button><br><br>
         
     </td>
@@ -289,10 +289,10 @@ canvas {
                <option value="3">3</option>
              </select>
              <br>
-         <input type ="number" disabled="true" id="brd7BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
-         <input type ="number" disabled="true" id="brd7BasD1" min="0" max="59" placeholder="Start Min"></input><br>
-         <input type ="number" disabled="true" id="brd7SonS1" min="0" max="23" placeholder="End Hour"></input><br>
-         <input type ="number" disabled="true" id="brd7SonD1" min="0" max="59" placeholder="End Min"></input><br>
+         <input type ="time" disabled="true" id="brd7BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+         <input type ="time" disabled="true" id="brd7BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+         <input type ="time" disabled="true" id="brd7SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+         <input type ="time" disabled="true" id="brd7SonD1" min="0" max="59" placeholder="End Min"></input><br>
         <button class="buttonMinik" onclick="brd7time()">send</button><br><br>
         
     </td>
@@ -312,10 +312,10 @@ canvas {
                <option value="3">3</option>
              </select>
              <br>
-         <input type ="number" disabled="true" id="brd8BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
-         <input type ="number" disabled="true" id="brd8BasD1" min="0" max="59" placeholder="Start Min"></input><br>
-         <input type ="number" disabled="true" id="brd8SonS1" min="0" max="23" placeholder="End Hour"></input><br>
-         <input type ="number" disabled="true" id="brd8SonD1" min="0" max="59" placeholder="End Min"></input><br>
+         <input type ="time" disabled="true" id="brd8BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+         <input type ="time" disabled="true" id="brd8BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+         <input type ="time" disabled="true" id="brd8SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+         <input type ="time" disabled="true" id="brd8SonD1" min="0" max="59" placeholder="End Min"></input><br>
         <button class="buttonMinik" onclick="brd8time()">send</button><br><br>
         
     </td>
@@ -334,10 +334,10 @@ canvas {
                <option value="3">3</option>
              </select>
              <br>
-         <input type ="number" disabled="true" id="brd9BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
-         <input type ="number" disabled="true" id="brd9BasD1" min="0" max="59" placeholder="Start Min"></input><br>
-         <input type ="number" disabled="true" id="brd9SonS1" min="0" max="23" placeholder="End Hour"></input><br>
-         <input type ="number" disabled="true" id="brd9SonD1" min="0" max="59" placeholder="End Min"></input><br>
+         <input type ="time" disabled="true" id="brd9BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
+         <input type ="time" disabled="true" id="brd9BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+         <input type ="time" disabled="true" id="brd9SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+         <input type ="time" disabled="true" id="brd9SonD1" min="0" max="59" placeholder="End Min"></input><br>
         <button class="buttonMinik" onclick="brd9time()">send</button><br><br>
         
     </td>
@@ -357,9 +357,9 @@ canvas {
              </select>
              <br>
          <input type ="time" disabled="true" id="brd10BasS1" min="0" max="23" placeholder="Start Hour"></input><br>
-         <input type ="number" disabled="true" id="brd10BasD1" min="0" max="59" placeholder="Start Min"></input><br>
-         <input type ="number" disabled="true" id="brd10SonS1" min="0" max="23" placeholder="End Hour"></input><br>
-         <input type ="number" disabled="true" id="brd10SonD1" min="0" max="59" placeholder="End Min"></input><br>
+         <input type ="time" disabled="true" id="brd10BasD1" min="0" max="59" placeholder="Start Min"></input><br>
+         <input type ="time" disabled="true" id="brd10SonS1" min="0" max="23" placeholder="End Hour"></input><br>
+         <input type ="time" disabled="true" id="brd10SonD1" min="0" max="59" placeholder="End Min"></input><br>
         <button class="buttonMinik" onclick="brd10time()">send</button><br><br>
         
     </td>

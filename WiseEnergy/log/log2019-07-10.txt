@@ -1,0 +1,18 @@
+2019-07-10 11:34:36 Info: No valid data fetched!
+2019-07-10 11:34:44 Warning: Start Pcap Driver => Start service failed!
+2019-07-10 11:34:45 Info: Load  "kcsphmod.dll"
+2019-07-10 11:34:45 Info: Load  "kcspidmod.dll"
+2019-07-10 11:34:45 Info: Load  "kcspimod.dll"
+2019-07-10 11:34:45 Info: Load  "kctcpmod.dll"
+2019-07-10 11:34:45 Info: Update poll interval.
+2019-07-10 11:41:14 Info: Update new device, ID:  "0001" , Communication port:  "COM10"
+2019-07-10 11:41:15 Warning: "Write modbus protocol error: Modbus Exception Response. (Mobus exception: 16, request: server address 1, function code 16, start address 6600)"
+2019-07-10 11:41:18 Warning: "Write modbus protocol error: Modbus Exception Response. (Mobus exception: 16, request: server address 1, function code 16, start address 6600)"
+2019-07-10 11:41:52 Warning: "Write modbus protocol error: Modbus Exception Response. (Mobus exception: 16, request: server address 1, function code 16, start address 6600)"
+2019-07-10 11:42:01 Warning: "Write modbus protocol error: Modbus Exception Response. (Mobus exception: 16, request: server address 1, function code 16, start address 6600)"
+2019-07-10 11:43:01 Info: Disable device.  ID:  "0001"
+2019-07-10 11:43:15 Info: Update new device, ID:  "0001" , Communication port:  "COM10"
+2019-07-10 11:43:52 Info: Disable device.  ID:  "0001"
+2019-07-10 11:44:36 Info: Update new device, ID:  "0001" , Communication port:  "COM10"
+2019-07-10 11:46:31 Info: Disable device.  ID:  "0001"
+2019-07-10 11:47:42 Info: Update new device, ID:  "0001" , Communication port:  "COM10"
