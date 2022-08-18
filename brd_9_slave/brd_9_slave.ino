@@ -1,3 +1,4 @@
+
 #include <Arduino.h>
 #include <Filters.h>                      //This library does a massive work check it's .cpp file
 
@@ -54,7 +55,7 @@ typedef struct struct_message {
 
 // Create a struct_message called BME280Readings to hold sensor readings
 struct_message myData;
-struct_message board1;
+struct_message board8;
 // Create a struct_message to hold incoming sensor readings
 struct_message incomingReadings;
 
@@ -66,7 +67,7 @@ typedef struct led_message {
 } led_message;
 // Create a struct_message called BME280Readings to hold sensor readings
 
-led_message relayboard_2; //Her board için değişltirlecek
+led_message relayboard_9; //Her board için değişltirlecek
 
 // ----------------------------------------------------------------------------
 // WiFi handling
@@ -115,16 +116,15 @@ void onReceive(const uint8_t *mac_addr, const uint8_t *data, int len) {
         mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]
     );
 
-memcpy(&relayboard_2, data, sizeof(relayboard_2));
+memcpy(&relayboard_9, data, sizeof(relayboard_9));
 
-  RelayState=relayboard_2.State;
+  RelayState=relayboard_9.State;
   EEPROM.write(0, RelayState);
   EEPROM.commit();
   Serial.println(RelayState);
-  delay(100);
   digitalWrite(relaypin, RelayState);
   digitalWrite(relayledpin, RelayState);
-  delay(100);
+
 }
 
 void initWiFi() {
@@ -184,12 +184,9 @@ void setup() {
     RelayState = EEPROM.read(0);
     digitalWrite(relaypin, RelayState);
     digitalWrite(relayledpin, RelayState);
-    delay(500);
     initWiFi();
-    delay(500);
     initEspNow();
-    delay(500);
-    myData.id=2; // her board için değiştirilecek
+    myData.id=9; // her board için değiştirilecek
     digitalWrite(5,1);
    
 }

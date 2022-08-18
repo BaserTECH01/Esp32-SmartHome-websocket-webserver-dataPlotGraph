@@ -134,7 +134,7 @@ void initWiFi() {
 // ESP-NOW handling
 // ----------------------------------------------------------------------------
 
-constexpr uint8_t ESP_NOW_RECEIVER[] = { 0x24, 0x6f, 0x28, 0xa0, 0xaf, 0x05 };
+constexpr uint8_t ESP_NOW_RECEIVER[] = { 0x30, 0xAE, 0xA4, 0x00, 0x0D, 0x8C };
 
 esp_now_peer_info_t peerInfo;
 
